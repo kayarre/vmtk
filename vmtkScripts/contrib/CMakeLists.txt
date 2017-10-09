@@ -5,6 +5,7 @@ set(CONTRIB_SCRIPTS_SRCS
     vmtkcenterlinestonumpy.py
     vmtkdijkstradistancetopoints.py
     vmtkdistancetospheres.py
+    vmtkflowextensions2.py
     vmtkgeodesicsurfaceresolution.py
     vmtkimagetonumpy.py
     vmtkmeshaddexternallayer.py
@@ -19,6 +20,7 @@ set(CONTRIB_SCRIPTS_SRCS
     vmtknumpytomesh.py
     vmtknumpytosurface.py
     vmtknumpywriter.py
+    vmtksurfaceclippercenterline.py
     vmtksurfaceresolution.py
     vmtksurfacetonumpy.py
     vmtksurfacewriter2.py
