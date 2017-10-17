@@ -372,7 +372,7 @@ class vmtkSurfaceClipperCenterline(pypes.pypeScript):
 
             for i in range(seeds_dict[seed_type].GetNumberOfIds()):
                 seedId = seeds_dict[seed_type].GetId(i)
-                print("hey", seedId)
+                #print(seedId)
 
                 #locator = vtk.vtkPointLocator()
                 #locator.SetDataSet(clippedSurface)
@@ -392,7 +392,6 @@ class vmtkSurfaceClipperCenterline(pypes.pypeScript):
                 if( seed_type == "outlets"):
                     # outward facing normal
                     centerlinetangent = tuple( -p for p in centerlinetangent)
-                print("tangent", centerlinetangent)
                 #planeEstimator = vtkvmtk.vtkvmtkPolyDataNormalPlaneEstimator()
                 #planeEstimator.SetInputData(clippedSurface)
                 #planeEstimator.SetOriginPointId(seedPointId)
