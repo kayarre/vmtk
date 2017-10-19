@@ -5,6 +5,7 @@ SET(CONTRIB_SCRIPTS_SRCS
     vmtkcenterlinestonumpy.py
     vmtkdijkstradistancetopoints.py
     vmtkdistancetospheres.py
+    vmtkflowextensions2.py
     vmtkgeodesicsurfaceresolution.py
     vmtkimagetonumpy.py
     vmtkmeshaddexternallayer.py
@@ -17,6 +18,7 @@ SET(CONTRIB_SCRIPTS_SRCS
     vmtknumpytoimage.py
     vmtknumpytosurface.py
     vmtknumpywriter.py
+    vmtksurfaceclippercenterline.py    
     vmtksurfaceresolution.py
     vmtksurfacetonumpy.py
     vmtksurfacewriter2.py
@@ -26,7 +28,7 @@ SET(CONTRIB_SCRIPTS_SRCS
     vmtkmeshmerge.py
     vmtkentityrenumber.py
   )
-  
+
 SET(CONTRIB_MODULE_SRCS
   vmtkcontribscripts.py
   )
@@ -65,4 +67,3 @@ INSTALL(PROGRAMS ${CONTRIB_STRIPPED_SCRIPTS_SRCS}
   COMPONENT RuntimeExecutables)
 
 ENDIF (NOT WIN32 AND NOT VMTK_MINIMAL_INSTALL)
-

@@ -362,6 +362,16 @@ class vmtkSurfaceClipperCenterline(pypes.pypeScript):
 
         seeds_dict = { "inlets": targetSeedIds, "outlets" : outletSeedIds}
 
+        ctr_points = vtk.vtkPoints()
+        ctr_points_id = vtk.vtkUnsignedCharArray()
+        ctr_points_id.SetNumberOfComponents(1)
+        ctr_points_id.SetName("BoundaryRegion")
+
+        ctr_pts_vector = vtk.vtkDoubleArray()
+        ctr_pts_vector.SetName("BoundaryDirection")
+        ctr_pts_vector.SetNumberOfComponents(3)
+
+        vertices = vtk.vtkCellArray()
         #print(targetSeedIds.GetNumberOfIds(), outletSeedIds.GetNumberOfIds())
         seed_count = 0
         print(targetSeedIds.GetNumberOfIds(), outletSeedIds.GetNumberOfIds())
@@ -387,11 +397,19 @@ class vmtkSurfaceClipperCenterline(pypes.pypeScript):
 
                 centerlinenormal = self.Centerlines.GetPointData().GetArray(self.FrenetNormalArrayName).GetTuple(centerlinePointId)
                 centerlinePoint = self.Centerlines.GetPoint(centerlinePointId)
+                ctr_points.InsertNextPoint(centerlinePoint)
+                vertex = vtk.vtkVertex()
+                vertex.GetPointIds().InsertId(seed_count, seed_count)
+                vertices.InsertNextCell(vertex)
 
 
                 if( seed_type == "outlets"):
                     # outward facing normal
                     centerlinetangent = tuple( -p for p in centerlinetangent)
+                    ctr_points_id.InsertNextTuple([1])
+                else:
+                    ctr_points_id.InsertNextTuple([0])
+                ctr_pts_vector.InsertNextTuple(centerlinetangent) #inward pointing
                 #planeEstimator = vtkvmtk.vtkvmtkPolyDataNormalPlaneEstimator()
                 #planeEstimator.SetInputData(clippedSurface)
                 #planeEstimator.SetOriginPointId(seedPointId)
@@ -757,6 +775,18 @@ class vmtkSurfaceClipperCenterline(pypes.pypeScript):
                 # writer7.SetFileName("clipped_test{0}.vtp".format(seed_count))
                 # writer7.SetInputData(clippedSurface)
                 # writer7.Update()
+
+
+        polydata = vtk.vtkPolyData()
+        polydata.SetPoints(ctr_points)
+        polydata.SetVerts(vertices)
+        polydata.GetPointData().AddArray(ctr_points_id)
+        polydata.GetPointData().AddArray(ctr_pts_vector)
+
+        writer7 = vtk.vtkXMLPolyDataWriter()
+        writer7.SetFileName("centerline_points.vtp")
+        writer7.SetInputData(polydata)
+        writer7.Update()
 
         self.Surface = clippedSurface
 
