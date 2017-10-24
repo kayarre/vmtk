@@ -66,17 +66,6 @@ class vmtkFlowExtensions(pypes.pypeScript):
             ['Centerlines','centerlines','vtkPolyData',1]
             ])
 
-    def LabelValidator(self,text):
-        import string
-        if not text:
-            return 0
-        if not text.split():
-            return 0
-        for char in text:
-            if char not in string.digits + " ":
-                return 0
-        return 1
-
     def Execute(self):
 
         if self.Surface == None:
@@ -107,45 +96,55 @@ class vmtkFlowExtensions(pypes.pypeScript):
         reader = vtk.vtkXMLPolyDataReader()
         reader.SetFileName("centerline_points.vtp")
         reader.Update()
-        clip_pts = reader.GetOutput().GetNumberOfPoints()
+        n_clip_pts = reader.GetOutput().GetNumberOfPoints()
+        print("nyumber of points: ", n_clip_pts)
 
         locator_ctrpt = vtk.vtkPointLocator()
         locator_ctrpt.SetDataSet(seedPolyData)
         locator_ctrpt.BuildLocator()
         case_dict = {"inlet" : vtk.vtkIdList(), "outlet" : vtk.vtkIdList()}
-        for clip_pt_id in range(clip_pts):
+        for clip_pt_id in range(n_clip_pts):
             clip_pt = reader.GetOutput().GetPoint(clip_pt_id)
             # 0 for inlet and 1 for outlet
-            flow_dir = reader.GetOutput().GetArray("BoundaryRegion").GetTuple(clip_pt)
+            flow_dir = reader.GetOutput().GetCellData().GetArray("BoundaryRegion").GetTuple(clip_pt_id)
 
             bary_pt_id = locator_ctrpt.FindClosestPoint(clip_pt)
             bary_pt = seedPolyData.GetPoint(bary_pt_id)
 
             dist = (vtk.vtkMath.Distance2BetweenPoints(clip_pt, bary_pt))**0.5
-            print("distance between points ")
+            #print("distance between points: ", dist)
             if (dist > 5.0):
                 continue
-            if (flow_dir == 0):
+            if (flow_dir[0] < 1.0):
                 case_dict["inlet"].InsertNextId(bary_pt_id)
             else:
                 case_dict["outlet"].InsertNextId(bary_pt_id)
 
-        for (d, ob) in case_dict.items():
+        ctr_points = vtk.vtkPoints()
+        ctr_points_id = vtk.vtkUnsignedCharArray()
+        ctr_points_id.SetNumberOfComponents(1)
+        ctr_points_id.SetName("BoundaryRegion")
+        vertices = vtk.vtkCellArray()
+        new_vertex_id = 0
+        source_list = []
+        target_list = []
+
+        for (d, bndIds) in case_dict.items():
             flowExtensionsFilter = vtkvmtk.vtkvmtkPolyDataFlowExtensionsFilter()
             flowExtensionsFilter.SetInputData(extendedsurface)
             flowExtensionsFilter.SetCenterlines(self.Centerlines)
-            flowExtensionsFilter.SetSigma(1.0)
-            flowExtensionsFilter.SetAdaptiveExtensionLength(1)
-            flowExtensionsFilter.SetAdaptiveExtensionRadius(0)
-            flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(0)
-            flowExtensionsFilter.SetExtensionLength(1.0)
-            flowExtensionsFilter.SetExtensionRadius(1.0)
-            flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(1.0)
-            flowExtensionsFilter.SetNumberOfBoundaryPoints(200)
+            flowExtensionsFilter.SetSigma(self.Sigma)
+            flowExtensionsFilter.SetAdaptiveExtensionLength(self.AdaptiveExtensionLength)
+            flowExtensionsFilter.SetAdaptiveExtensionRadius(self.AdaptiveExtensionRadius)
+            flowExtensionsFilter.SetAdaptiveNumberOfBoundaryPoints(self.AdaptiveNumberOfBoundaryPoints)
+            flowExtensionsFilter.SetExtensionLength(self.ExtensionLength)
+            flowExtensionsFilter.SetExtensionRadius(self.ExtensionRadius)
+            flowExtensionsFilter.SetCenterlineNormalEstimationDistanceRatio(self.CenterlineNormalEstimationDistanceRatio)
+            flowExtensionsFilter.SetNumberOfBoundaryPoints(self.TargetNumberOfBoundaryPoints)
             flowExtensionsFilter.SetExtensionModeToUseCenterlineDirection()
-            flowExtensionsFilter.SetBoundaryIds(boundaryIds)
+            flowExtensionsFilter.SetBoundaryIds(bndIds)
 
-            if( d == 0 ): #inlet
+            if( d == "inlet" ): #inlet
                 flowExtensionsFilter.SetExtensionRatio(4.0)
                 flowExtensionsFilter.SetTransitionRatio(0.25)
             else:
@@ -155,6 +154,97 @@ class vmtkFlowExtensions(pypes.pypeScript):
             flowExtensionsFilter.Update()
             extendedsurface = flowExtensionsFilter.GetOutput()
 
+            # keep information about the inlets and outlets
+            new_boundaryIds = vtk.vtkIdList()
+
+            bndryExtractor = vtkvmtk.vtkvmtkPolyDataBoundaryExtractor()
+            bndryExtractor.SetInputData(extendedsurface)
+            bndryExtractor.Update()
+            bndries = bndryExtractor.GetOutput()
+            n_bndries = bndries.GetNumberOfCells()
+            new_seedPoints = vtk.vtkPoints()
+            for i in range(n_bndries):
+                new_barycenter = [0.0, 0.0, 0.0]
+                vtkvmtk.vtkvmtkBoundaryReferenceSystems.ComputeBoundaryBarycenter(bndries.GetCell(i).GetPoints(),new_barycenter)
+
+                bary_pt_id = locator_ctrpt.FindClosestPoint(new_barycenter)
+                bary_pt = seedPolyData.GetPoint(bary_pt_id)
+
+                dist = (vtk.vtkMath.Distance2BetweenPoints(new_barycenter, bary_pt))**0.5
+                #print("distance between points: ", dist)
+                if (dist < 1.0E-4):
+                    continue
+                else:
+                    ctr_points.InsertNextPoint(new_barycenter)
+                    vertex = vtk.vtkVertex()
+                    vertex.GetPointIds().InsertNextId(int(new_vertex_id))
+                    new_vertex_id += 1
+                    vertices.InsertNextCell(vertex)
+
+                    if( d == "outlet"):
+                        ctr_points_id.InsertNextTuple([int(1)])
+                        target_list.append(new_barycenter)
+                    else:
+                        ctr_points_id.InsertNextTuple([int(0)])
+                        source_list.append(new_barycenter)
+
+                    seedPolyData.GetPoints().SetPoint(bary_pt_id, new_barycenter)
+                    locator_ctrpt.SetDataSet(seedPolyData)
+                    locator_ctrpt.BuildLocator()
+
+
+
+        surfaceCapper = vtkvmtk.vtkvmtkCapPolyData()
+        surfaceCapper.SetInputData(extendedsurface)
+        surfaceCapper.SetDisplacement(0.0)
+        surfaceCapper.SetInPlaneDisplacement(0.0)
+        surfaceCapper.Update()
+        centerlineInputSurface = surfaceCapper.GetOutput()
+        capCenterIds = surfaceCapper.GetCapCenterIds()
+        capBoundaryIds = surfaceCapper.GetBoundaryIds()
+
+        boundary_array = vtk.vtkUnsignedCharArray()
+        boundary_array.SetNumberOfComponents(1)
+        boundary_array.SetNumberOfTuples(capCenterIds.GetNumberOfIds())
+        boundary_array.SetName("BoundaryId")
+        #print(capCenterIds, dir(capCenterIds))
+        print(capCenterIds.GetNumberOfIds())
+
+        seedPolyData.SetPoints(ctr_points)
+        locator_ctrpt.SetDataSet(seedPolyData)
+        locator_ctrpt.BuildLocator()
+        #print(dir(capBoundaryIds))
+        for i in range(capCenterIds.GetNumberOfIds()):
+            ctr_pt_id = capCenterIds.GetId(i)
+            center_pt = centerlineInputSurface.GetPoint(ctr_pt_id)
+            bary_pt_id = locator_ctrpt.FindClosestPoint(center_pt)
+            bary_pt = seedPolyData.GetPoint(bary_pt_id)
+
+            dist = (vtk.vtkMath.Distance2BetweenPoints(center_pt, bary_pt))**0.5
+            print(" distance between: ", dist)
+
+            #bndId = capBoundaryIds.GetId(ctr_pt_id)
+            flow_direction = ctr_points_id.GetTuple(bary_pt_id)
+            print("stuff: ", i, flow_direction[0])
+            boundary_array.SetTuple(bary_pt_id, [int(i+2)])
+
+        polydata = vtk.vtkPolyData()
+        polydata.SetPoints(ctr_points)
+        polydata.SetVerts(vertices)
+        polydata.GetCellData().AddArray(ctr_points_id)
+        polydata.GetCellData().AddArray(boundary_array)
+        print(ctr_points.GetNumberOfPoints(), ctr_points_id.GetNumberOfTuples())
+
+        writer7 = vtk.vtkXMLPolyDataWriter()
+        writer7.SetFileName("centerline_points_ext.vtp")
+        writer7.SetInputData(polydata)
+        writer7.Update()
+
+        #print("source pts: ", [item for sublist in source_list for item in sublist])
+        #print("target pts: ", [item for sublist in target_list for item in sublist])
+
+        print("source pts: ", " ".join(map(str, [item for sublist in source_list for item in sublist])))
+        print("target pts: ", " ".join(map(str, [item for sublist in target_list for item in sublist])))
         self.Surface = extendedsurface
 
 

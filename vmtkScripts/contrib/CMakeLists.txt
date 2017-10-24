@@ -18,7 +18,7 @@ SET(CONTRIB_SCRIPTS_SRCS
     vmtknumpytoimage.py
     vmtknumpytosurface.py
     vmtknumpywriter.py
-    vmtksurfaceclippercenterline.py    
+    vmtksurfaceclippercenterline.py
     vmtksurfaceresolution.py
     vmtksurfacetonumpy.py
     vmtksurfacewriter2.py
