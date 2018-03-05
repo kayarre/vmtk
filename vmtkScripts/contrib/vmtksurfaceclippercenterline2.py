@@ -289,7 +289,7 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
         self.remesh = 1
 
 
-        self.SetScriptName('vmtksurfaceclippercenterline2')
+        self.SetScriptName('vmtksurfaceclippercenterline')
         self.SetScriptDoc('interactively clip a tubular surface with normals estimated from centerline tangents')
         self.SetInputMembers([
             ['Surface','i','vtkPolyData',1,'','the input surface','vmtksurfacereader'],
