@@ -44,7 +44,7 @@ class vmtkFlowExtensions2(pypes.pypeScript):
         self.InterpolationMode = "thinplatespline"
         self.Sigma = 1.0
 
-        self.SetScriptName('vmtkflowextensions2')
+        self.SetScriptName('vmtkflowextensions')
         self.SetInputMembers([
             ['Surface','i','vtkPolyData',1,'','','vmtksurfacereader'],
             ['Centerlines','centerlines','vtkPolyData',1,'','','vmtksurfacereader'],
