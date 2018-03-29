@@ -24,6 +24,7 @@ set(CONTRIB_SCRIPTS_SRCS
     vmtksurfaceresolution.py
     vmtksurfacetonumpy.py
     vmtksurfacewriter2.py
+    vmtksurfaceclipperboundaryreference.py
     vmtksurfaceclippercenterline2.py
     vmtksurfaceextractannularwalls.py
     vmtksurfaceextractinnercylinder.py
