@@ -19,7 +19,6 @@ import sys
 
 from vmtk import pypes
 from vmtk import vtkvmtk
-from vmtk import vmtkscripts
 
 
 class vmtkImageVesselEnhancement(pypes.pypeScript):
@@ -184,11 +183,11 @@ class vmtkImageVesselEnhancement(pypes.pypeScript):
           # filters only work on float
           print("input type not of type float, casting to float")
           #TODO use rescale filter for proper mapping
-          castFilter = vmtkscripts.vmtkImageCast()
-          castFilter.Image = self.Image
-          castFilter.OutputType = 'float'
-          castFilter.Execute()
-          self.Image.DeepCopy(castFilter.Image)
+          cast = vtk.vtkImageCast()
+          cast.SetInputData(self.Image)
+          cast.SetOutputScalarTypeToFloat()
+          cast.Update()
+          self.Image.DeepCopy(cast.GetOutput())
 
         if(self.Image.GetDataDimension() != 3):
           self.PrintError('Error: unsupported image dimension, expected {0}D image'.format(3))
