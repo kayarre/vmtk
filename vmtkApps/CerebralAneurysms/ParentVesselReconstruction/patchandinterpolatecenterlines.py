@@ -388,16 +388,16 @@ print('Aneurysm Type		', aneurysmType)
 print('')
 
 # outputfilenames:
-divergingPointsFilename         = inputfiledirectory + '/' + ID + '/' + ID + '_divergingpoints.vtp'
-patchParentArteryFilename       = inputfiledirectory + '/' + ID + '/' + ID + '_patchcl.vtp'
-interpolatedCenterlinesFilename = inputfiledirectory + '/' + ID + '/' + ID + '_interpolatedcl.vtp'
+divergingPointsFilename         = inputfiledirectory + '/' + ID + '_divergingpoints.vtp'
+patchParentArteryFilename       = inputfiledirectory +'/' + ID + '_patchcl.vtp'
+interpolatedCenterlinesFilename = inputfiledirectory +'/' + ID + '_interpolatedcl.vtp'
 
 if (aneurysmType == 'lateral'):
 
    if (setClippingPoints == 0):
-      forwardCenterlinesFilename  = inputfiledirectory + '/' + ID + '/'+ ID + '_forwardcl.vtp'
-      backwardCenterlinesFilename = inputfiledirectory + '/' + ID + '/'+ ID + '_backwardcl.vtp'
-      clippingPointsFilename      = inputfiledirectory + '/' + ID + '/' + ID + '_clippingpoints.vtp'
+      forwardCenterlinesFilename  = inputfiledirectory +'/'+ ID + '_forwardcl.vtp'
+      backwardCenterlinesFilename = inputfiledirectory +'/'+ ID + '_backwardcl.vtp'
+      clippingPointsFilename      = inputfiledirectory +'/' + ID + '_clippingpoints.vtp'
 
       forwardCenterlines      = ReadPolyData(forwardCenterlinesFilename)
       backwardCenterlines     = ReadPolyData(backwardCenterlinesFilename)
@@ -427,8 +427,8 @@ if (aneurysmType == 'lateral'):
 
    elif (setClippingPoints == 1):
       print('Clipping Points and Parent Vessel Centerlines provided')
-      parentArteryFileName   = inputfiledirectory + '/' + ID + '/' + ID + '_parentvessel.vtp'
-      clippingPointsFileName = inputfiledirectory + '/' + ID + '/' + ID + '_clippingpoints.vtp'
+      parentArteryFileName   = inputfiledirectory +'/' + ID + '_parentvessel.vtp'
+      clippingPointsFileName = inputfiledirectory +'/' + ID + '_clippingpoints.vtp'
 
       clippingPoints          = ReadPolyData(clippingPointsFileName)
       parentArteryCenterlines = ReadPolyData(parentArteryFileName)
@@ -447,10 +447,10 @@ if (aneurysmType == 'terminal'):
    useAdditionalInterpolationPoint = 1
 
    if (setClippingPoints == 0):
-      parentArteryCenterlinesFilename = inputfiledirectory + '/' + ID + '/' + ID + '_parentvessel.vtp'
-      daughter1CenterlinesFilename    = inputfiledirectory + '/' + ID + '/' + ID + '_dau1cl.vtp'
-      daughter2CenterlinesFilename    = inputfiledirectory + '/' + ID + '/' + ID + '_dau2cl.vtp'
-      clippingPointsFilename          = inputfiledirectory + '/' + ID + '/' + ID + '_clippingpoints.vtp'
+      parentArteryCenterlinesFilename = inputfiledirectory +'/' + ID + '_parentvessel.vtp'
+      daughter1CenterlinesFilename    = inputfiledirectory +'/' + ID + '_dau1cl.vtp'
+      daughter2CenterlinesFilename    = inputfiledirectory +'/' + ID + '_dau2cl.vtp'
+      clippingPointsFilename          = inputfiledirectory +'/' + ID + '_clippingpoints.vtp'
 
       parentArteryCenterlines = ReadPolyData(parentArteryCenterlinesFilename)
       daughter1Centerlines    = ReadPolyData(daughter1CenterlinesFilename)
@@ -482,8 +482,8 @@ if (aneurysmType == 'terminal'):
 
    elif (setClippingPoints == 1):
       print('Clipping Points and Parent Vessel Centerlines provided')
-      parentArteryFileName   = inputfiledirectory + '/' + ID + '/' + ID + '_parentvessel.vtp'
-      clippingPointsFileName = inputfiledirectory + '/' + ID + '/' + ID + '_clippingpoints.vtp'
+      parentArteryFileName   = inputfiledirectory +'/' + ID + '_parentvessel.vtp'
+      clippingPointsFileName = inputfiledirectory +'/' + ID + '_clippingpoints.vtp'
 
       clippingPoints          = ReadPolyData(clippingPointsFileName)
       parentArteryCenterlines = ReadPolyData(parentArteryFileName)
