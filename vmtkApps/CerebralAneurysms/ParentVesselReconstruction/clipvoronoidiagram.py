@@ -262,12 +262,12 @@ print('Inputfiles Directory	', inputfiledirectory)
 print('case ID			', ID)
 print('')
 
-voronoiDiagramFilename   = inputfiledirectory + '/' + ID + '/' + ID + '_voronoi.vtp'
-patchCenterlinesFilename = inputfiledirectory + '/' + ID + '/' + ID + '_patchcl.vtp'
+voronoiDiagramFilename   = inputfiledirectory +'/' + ID + '_voronoi.vtp'
+patchCenterlinesFilename = inputfiledirectory +'/' + ID + '_patchcl.vtp'
 
 #outputfilenames:
-clippedVoronoiDiagramFilename = inputfiledirectory + '/' + ID + '/' + ID + '_clippedvoronoi.vtp'
-smoothVoronoiDiagramFilename  = inputfiledirectory + '/' + ID + '/' + ID + '_smoothclippedvoronoi.vtp'
+clippedVoronoiDiagramFilename = inputfiledirectory +'/' + ID + '_clippedvoronoi.vtp'
+smoothVoronoiDiagramFilename  = inputfiledirectory +'/' + ID + '_smoothclippedvoronoi.vtp'
 
 originalVoronoiDiagram = ReadPolyData(voronoiDiagramFilename)
 patchCenterlines       = ReadPolyData(patchCenterlinesFilename)

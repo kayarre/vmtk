@@ -444,7 +444,7 @@ parallelTransportNormalsArrayName = 'ParallelTransportNormals'
 
 #OPTIONS TO SET
 interpolationHalfSize = 3
-polyBallImageSize = [90,90,90]   #size of the image for the evaluation of the polyball function
+polyBallImageSize = [150,150,150]   #size of the image for the evaluation of the polyball function
 
 #inputfilenames:
 print('USAGE:')
@@ -459,17 +459,17 @@ print('Inputfiles Directory	', inputfiledirectory)
 print('case ID			', ID)
 print('')
 
-interpolatedCenterlinesFilename = inputfiledirectory + '/' + ID + '/' + ID + '_interpolatedcl.vtp'
-patchCenterlinesFilename        = inputfiledirectory + '/' + ID + '/' + ID + '_patchcl.vtp'
+interpolatedCenterlinesFilename = inputfiledirectory +'/' + ID + '_interpolatedcl.vtp'
+patchCenterlinesFilename        = inputfiledirectory +'/' + ID + '_patchcl.vtp'
 if smoothedVoronoi == 1:
-   clippedVoronoiFilename       = inputfiledirectory + '/' + ID + '/' + ID + '_smoothclippedvoronoi.vtp'
+   clippedVoronoiFilename       = inputfiledirectory +'/' + ID + '_smoothclippedvoronoi.vtp'
 else:
-   clippedVoronoiFilename       = inputfiledirectory + '/' + ID + '/' + ID + '_clippedvoronoi.vtp'
-clippingPointsFilename          = inputfiledirectory + '/' + ID + '/' + ID + '_clippingpoints.vtp'
+   clippedVoronoiFilename       = inputfiledirectory +'/' + ID + '_clippedvoronoi.vtp'
+clippingPointsFilename          = inputfiledirectory +'/' + ID + '_clippingpoints.vtp'
 
 #outputfilenames:
-completeVoronoiFilename         = inputfiledirectory + '/' + ID + '/' + ID + '_completevoronoi.vtp'
-surfaceFilename                 = inputfiledirectory + '/' + ID + '/' + ID + '_reconstructedmodel.vtp'
+completeVoronoiFilename         = inputfiledirectory +'/' + ID + '_completevoronoi.vtp'
+surfaceFilename                 = inputfiledirectory +'/' + ID + '_reconstructedmodel.vtp'
 
 interpolatedCenterlines = ReadPolyData(interpolatedCenterlinesFilename)
 patchCenterlines = ReadPolyData(patchCenterlinesFilename)
