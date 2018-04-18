@@ -1,0 +1,9 @@
+project(VMTKSCRIPT_RESOURCES)
+
+set(VMTKSCRIPT_RESOURCES_SRCS
+  vmtkimagevolumeviewerpresets.xml
+  )
+
+install(FILES ${VMTKSCRIPT_RESOURCES_SRCS}
+  DESTINATION ${VMTK_SCRIPTS_INSTALL_LIB_DIR}/share
+  COMPONENT PythonRuntimeLibraries)
