@@ -7,7 +7,7 @@
 ## Version:   $Revision: 1.7 $
 
 ##   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-##   See LICENCE file for details.
+##   See LICENSE file for details.
 
 ##      This software is distributed WITHOUT ANY WARRANTY; without even
 ##      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
@@ -30,6 +30,7 @@ class vmtkFlowExtensions2(pypes.pypeScript):
 
         self.Surface = None
         self.Centerlines = None
+        self.BoundaryDirection = None
 
         self.AdaptiveExtensionLength = 0
         self.AdaptiveExtensionRadius = 1
@@ -44,10 +45,11 @@ class vmtkFlowExtensions2(pypes.pypeScript):
         self.InterpolationMode = "thinplatespline"
         self.Sigma = 1.0
 
-        self.SetScriptName('vmtkflowextensions')
+        self.SetScriptName('vmtkflowextensions2')
         self.SetInputMembers([
             ['Surface','i','vtkPolyData',1,'','','vmtksurfacereader'],
             ['Centerlines','centerlines','vtkPolyData',1,'','','vmtksurfacereader'],
+            ['BoundaryDirection','boundary','vtkPolyData',1,'','','vmtksurfacereader'],
             ['ExtensionMode','extensionmode','str',1,'["centerlinedirection","boundarynormal"]','method for computing the normal for extension'],
             ['InterpolationMode','interpolationmode','str',1,'["linear","thinplatespline"]','method for computing interpolation from the model section to a circular section'],
             ['Sigma','sigma','float',1,'(0.0,)','thin plate spline stiffness'],
@@ -63,7 +65,8 @@ class vmtkFlowExtensions2(pypes.pypeScript):
             ])
         self.SetOutputMembers([
             ['Surface','o','vtkPolyData',1,'','','vmtksurfacewriter'],
-            ['Centerlines','centerlines','vtkPolyData',1]
+            ['Centerlines','centerlines','vtkPolyData',1],
+            ['BoundaryDirectionExtension','boundaryextension','vtkPolyData',1,'','','vmtksurfacewriter']
             ])
 
     def Execute(self):
@@ -73,6 +76,9 @@ class vmtkFlowExtensions2(pypes.pypeScript):
 
         if self.ExtensionMode == "centerlinedirection" and self.Centerlines == None:
             self.PrintError('Error: No input centerlines.')
+            
+        if self.BoundaryDirection == None:
+            self.PrintError('Error: No Boundary Direction file.')
 
         extendedsurface = vtk.vtkPolyData()
         extendedsurface.DeepCopy(self.Surface)
@@ -93,20 +99,21 @@ class vmtkFlowExtensions2(pypes.pypeScript):
         seedPolyData = vtk.vtkPolyData()
         seedPolyData.SetPoints(seedPoints)
 
-        reader = vtk.vtkXMLPolyDataReader()
-        reader.SetFileName("centerline_points.vtp")
-        reader.Update()
-        n_clip_pts = reader.GetOutput().GetNumberOfPoints()
-        print("nyumber of points: ", n_clip_pts)
+
+        #reader = vtk.vtkXMLPolyDataReader()
+        #reader.SetFileName("centerline_points.vtp")
+        #reader.Update()
+        n_clip_pts = self.BoundaryDirection.GetNumberOfPoints()
+        print("number of points: ", n_clip_pts)
 
         locator_ctrpt = vtk.vtkPointLocator()
         locator_ctrpt.SetDataSet(seedPolyData)
         locator_ctrpt.BuildLocator()
         case_dict = {"inlet" : vtk.vtkIdList(), "outlet" : vtk.vtkIdList()}
         for clip_pt_id in range(n_clip_pts):
-            clip_pt = reader.GetOutput().GetPoint(clip_pt_id)
+            clip_pt = self.BoundaryDirection.GetPoint(clip_pt_id)
             # 0 for inlet and 1 for outlet
-            flow_dir = reader.GetOutput().GetCellData().GetArray("BoundaryRegion").GetTuple(clip_pt_id)
+            flow_dir = self.BoundaryDirection.GetCellData().GetArray("BoundaryRegion").GetTuple(clip_pt_id)
 
             bary_pt_id = locator_ctrpt.FindClosestPoint(clip_pt)
             bary_pt = seedPolyData.GetPoint(bary_pt_id)
@@ -235,10 +242,11 @@ class vmtkFlowExtensions2(pypes.pypeScript):
         polydata.GetCellData().AddArray(boundary_array)
         print(ctr_points.GetNumberOfPoints(), ctr_points_id.GetNumberOfTuples())
 
-        writer7 = vtk.vtkXMLPolyDataWriter()
-        writer7.SetFileName("centerline_points_ext.vtp")
-        writer7.SetInputData(polydata)
-        writer7.Update()
+        #writer7 = vtk.vtkXMLPolyDataWriter()
+        #writer7.SetFileName("centerline_points_ext.vtp")
+        #writer7.SetInputData(polydata)
+        #writer7.Update()
+        self.BoundaryDirectionExtension = polydata
 
         #print("source pts: ", [item for sublist in source_list for item in sublist])
         #print("target pts: ", [item for sublist in target_list for item in sublist])

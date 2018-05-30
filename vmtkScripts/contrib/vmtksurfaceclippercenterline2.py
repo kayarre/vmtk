@@ -299,6 +299,7 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
             ])
         self.SetOutputMembers([
             ['Surface','o','vtkPolyData',1,'','the output surface','vmtksurfacewriter'],
+             ['BoundaryDirection','boundary','vtkPolyData',1,'','the vertex inlet/outlet point information','vmtksurfacewriter']
             ])
 
     def Execute(self):
@@ -793,11 +794,13 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
         polydata.GetCellData().AddArray(ctr_pts_vector)
         #print(ctr_points.GetNumberOfPoints(), ctr_points_id.GetNumberOfTuples(), ctr_pts_vector.GetNumberOfTuples(), vertices.GetNumberOfCells())
 
-        writer7 = vtk.vtkXMLPolyDataWriter()
-        writer7.SetFileName("centerline_points.vtp")
+        #writer7 = vtk.vtkXMLPolyDataWriter()
+        #writer7.SetFileName("centerline_points.vtp")
         #writer7.SetDataModeToAscii()
-        writer7.SetInputData(polydata)
-        writer7.Update()
+        #writer7.SetInputData(polydata)
+        #writer7.Update()
+        
+        self.BoundaryDirection = polydata
 
         self.Surface = clippedSurface
 
