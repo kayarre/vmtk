@@ -112,7 +112,6 @@ class vmtksubsetremesh():
         self.Surface = surfaceRemeshing.GetOutput()
 
 
-
 class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
 
     def __init__(self):
@@ -171,7 +170,6 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
 
         clippedSurface = ids.GetOutput()
 
-       
         # Extract the boundary reference points from  polydata
         brd = self.BoundaryInfo
         # Get the number of points in the polydata
@@ -181,7 +179,7 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
             arrayName =  brd.GetPointData().GetArrayName(i)
             if(arrayName == "BoundaryNormals"):
                 brd_normals = brd.GetPointData().GetArray(i)
-        
+
         for i in range(idNumPointsInFile):
             br_point = brd.GetPoint(i)
             br_normal = brd_normals.GetTuple(i)
@@ -193,17 +191,17 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
 
             seedPointId = locator.FindClosestPoint(br_point)
             surf_point = clippedSurface.GetPoint(seedPointId)
-            
+
             pt_diff = [0.0, 0.0, 0.0]
             vtk.vtkMath.Subtract(surf_point, br_point, pt_diff)
             pt_normalize = vtk.vtkMath.Normalize(pt_diff)
-            
+
             ortho = vtk.vtkMath.Dot(inward_normal, pt_diff)
             #print(ortho)
             if (abs(ortho) > 0.49):
                 #proceed
                 continue
-            
+
             plane = vtk.vtkPlane()
             plane.SetOrigin(br_point)
             plane.SetNormal(inward_normal)
@@ -214,13 +212,12 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
             seamFilter.SetSeamScalarsArrayName("SeamScalars")
             seamFilter.SetSeamFunction(plane)
             seamFilter.Update()
-            
+
             #print("got here")
             #writer3 = vtk.vtkXMLPolyDataWriter()
             #writer3.SetFileName("seam_test_{0}.vtp".format(i))
             #writer3.SetInputConnection(seamFilter.GetOutputPort())
             #writer3.Update()
-
 
             tree = vtk.vtkModifiedBSPTree()
             tree.SetDataSet(seamFilter.GetOutput())
@@ -268,7 +265,6 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
                     IntersectPointsList.InsertNextPoint(pt)
                     IntersectCellsList.InsertNextId(IntersectCells.GetId(0))
                     #print(IntersectPoints.GetPoint(0), IntersectCells.GetId(0) )
-
 
                 #Create a cell array to connect the points into meaningful geometry
                 vertexIndices = vtk.vtkIdList()
@@ -396,7 +392,6 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
                 geometryFilter.GetOutput().GetPointData().AddArray(dist_2_plane)
                 geometryFilter.Update()
 
-
                 remeshsubset = vmtksubsetremesh()
                 remeshsubset.CellEntityIdsArrayName = "RemeshCells"
                 remeshsubset.ElementSizeMode = 'edgelengtharray'
@@ -406,7 +401,6 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
                 remeshsubset.Surface = geometryFilter.GetOutput()
                 remeshsubset.ExcludeEntityIds = [0] #list(free_edge_cells)
                 remeshsubset.Execute()
-
 
                 #invert the selection
                 selectionNode.GetProperties().Set(vtk.vtkSelectionNode().INVERSE(), 1)
@@ -430,14 +424,12 @@ class vmtkSurfaceClipperBoundaryReference(pypes.pypeScript):
                 surfaceTriangulator2.PassVertsOff()
                 surfaceTriangulator2.Update()
 
-
                 seamFilter2 = vtkvmtk.vtkvmtkTopologicalSeamFilter()
                 seamFilter2.SetInputConnection(surfaceTriangulator2.GetOutputPort())
                 seamFilter2.SetClosestPoint(IntersectPointsList.GetPoint(0))
                 seamFilter2.SetSeamScalarsArrayName("SeamScalars")
                 seamFilter2.SetSeamFunction(plane)
                 seamFilter2.Update()
-
 
                 clipper = vtk.vtkClipPolyData()
                 clipper.SetInputConnection(seamFilter2.GetOutputPort())

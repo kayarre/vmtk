@@ -76,7 +76,7 @@ class vmtkFlowExtensions2(pypes.pypeScript):
 
         if self.ExtensionMode == "centerlinedirection" and self.Centerlines == None:
             self.PrintError('Error: No input centerlines.')
-            
+
         if self.BoundaryDirection == None:
             self.PrintError('Error: No Boundary Direction file.')
 
@@ -98,7 +98,6 @@ class vmtkFlowExtensions2(pypes.pypeScript):
             boundaryIds.InsertNextId(i)
         seedPolyData = vtk.vtkPolyData()
         seedPolyData.SetPoints(seedPoints)
-
 
         #reader = vtk.vtkXMLPolyDataReader()
         #reader.SetFileName("centerline_points.vtp")
@@ -199,8 +198,6 @@ class vmtkFlowExtensions2(pypes.pypeScript):
                     locator_ctrpt.SetDataSet(seedPolyData)
                     locator_ctrpt.BuildLocator()
 
-
-
         surfaceCapper = vtkvmtk.vtkvmtkCapPolyData()
         surfaceCapper.SetInputData(extendedsurface)
         surfaceCapper.SetDisplacement(0.0)
@@ -254,7 +251,6 @@ class vmtkFlowExtensions2(pypes.pypeScript):
         print("source pts: ", " ".join(map(str, [item for sublist in source_list for item in sublist])))
         print("target pts: ", " ".join(map(str, [item for sublist in target_list for item in sublist])))
         self.Surface = extendedsurface
-
 
 
 if __name__=='__main__':
