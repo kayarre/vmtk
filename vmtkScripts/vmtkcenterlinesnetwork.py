@@ -88,13 +88,16 @@ class vmtkCenterlinesNetwork(pypes.pypeScript):
         self.PoleIds = None
 
         self.vmtkRenderer = None
+        self.RawTopology = 0
         self.OwnRenderer = 0
 
         self.SetScriptName('vmtkcenterlinesnetwork')
         self.SetScriptDoc('compute centerlines from a branching tubular surface automatically.')
         self.SetInputMembers([
             ['Surface','i','vtkPolyData',1,'','the input surface','vmtksurfacereader'],
-            ['vmtkRenderer','renderer','vmtkRenderer',1,'','external renderer']])
+            ['vmtkRenderer','renderer','vmtkRenderer',1,'','external renderer'],
+            ['RawTopology','rawtopology','bool',1,'','use the output from vmtknetworkextraction (keep all segments)']
+            ])
         self.SetOutputMembers([
             ['Centerlines','o','vtkPolyData',1,'','the output centerlines','vmtksurfacewriter'],
             ['RadiusArrayName','radiusarray','str',1,'','name of the array where radius values of maximal inscribed spheres are stored'],
@@ -122,6 +125,7 @@ class vmtkCenterlinesNetwork(pypes.pypeScript):
 
         # if numEdges is not 0, then there are holes which need to be capped
         numEdges = ofedges.GetNumberOfPoints()
+        numCells_pre = self.Surface.GetNumberOfCells()
         if numEdges != 0:
             tempcapper = vmtksurfacecapper.vmtkSurfaceCapper()
             tempcapper.Surface = self.Surface
@@ -131,13 +135,46 @@ class vmtkCenterlinesNetwork(pypes.pypeScript):
             networkSurface = tempcapper.Surface
         else:
             networkSurface = self.Surface
-
+        
+        # what if the surface is disconnected
+        # need hole in each surface
+        
+        surface_conn = vtk.vtkConnectivityFilter()
+        surface_conn.SetExtractionModeToAllRegions()
+        surface_conn.ColorRegionsOn()
+        surface_conn.SetInputData(networkSurface)
+        
+        surface_conn.Update()
+        N_regions = surface_conn.GetNumberOfExtractedRegions()
+        
         # randomly select one cell to delete so that there is an opening for
         # vmtkNetworkExtraction to use.
-        numCells = self.Surface.GetNumberOfCells()
-        cellToDelete = random.randrange(0, numCells-1)
+        numCells_post = networkSurface.GetNumberOfCells()
+        if (numCells_post  > numCells_pre):
+            min_cell_range = numCells_pre-1
+        elif(numCells_post  == numCells_pre):
+            min_cell_range = 0
+        else:
+            self.PrintError('Error: surface capper did something weird: pre size {0} > post size {1}'.format(numCells_pre, numCells_post))
         networkSurface.BuildLinks()
-        networkSurface.DeleteCell(cellToDelete)
+        
+        if N_regions > 1:
+            regions = list(range(N_regions))
+            delete_list = []
+            while len(regions) > 0:
+                cellToDelete = random.randrange(min_cell_range, numCells_post-1)
+                region_id = surface_conn.GetOutput().GetCellData().GetArray("RegionId").GetTuple(cellToDelete)[0]
+                if region_id in regions:
+                    regions.remove(region_id)
+                    delete_list.append(cellToDelete)
+            
+            for id_ in delete_list:
+                networkSurface.DeleteCell(id_)
+        else:
+            cellToDelete = random.randrange(min_cell_range, numCells_post-1)
+            networkSurface.BuildLinks()
+            networkSurface.DeleteCell(cellToDelete)
+        
         networkSurface.RemoveDeletedCells()
 
         # extract the network of approximated centerlines
@@ -146,6 +183,12 @@ class vmtkCenterlinesNetwork(pypes.pypeScript):
         net.AdvancementRatio = 1.001
         net.Execute()
         network = net.Network
+        
+        #writer = vtk.vtkXMLPolyDataWriter()
+        #writer.SetInputData(network)
+        #writer.SetFileName("test_net.vtp")
+        #writer.SetDataModeToBinary()
+        #writer.Write()
 
         convert = vmtkcenterlinestonumpy.vmtkCenterlinesToNumpy()
         convert.Centerlines = network
@@ -157,13 +200,15 @@ class vmtkCenterlinesNetwork(pypes.pypeScript):
         # the network topology identifies an the input segment with the "0" id.
         # since we artificially created this segment, we don't want to use the
         # ends of the segment as source/target points of the centerline calculation
+        
         nodeIndexToIgnore = np.where(cellDataTopology[:,0] == 0)[0][0]
         keepCellConnectivityList = []
         pointIdxToKeep = np.array([])
+        removeCellLength = 0
         # we remove the cell, points, and point data which are associated with the
         # segment we want to ignore
         for loopIdx, cellConnectivityList in enumerate(ad['CellData']['CellPointIds']):
-            if loopIdx == nodeIndexToIgnore:
+            if (loopIdx == nodeIndexToIgnore and not self.RawTopology):
                 removeCellStartIdx = cellConnectivityList[0]
                 removeCellEndIdx = cellConnectivityList[-1]
                 removeCellLength = cellConnectivityList.size
