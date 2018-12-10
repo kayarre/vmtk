@@ -28,7 +28,6 @@ from vmtk import pypes
 import copy
 
 
-
 ## TODO: make SeedSelector a separate pype script to be used in other contexts
 class vmtkSeedSelector(object):
 
@@ -46,6 +45,7 @@ class vmtkSeedSelector(object):
 
     def SetSurface(self,surface):
         self._Surface = surface
+
     def GetSurface(self):
         return self._Surface
 
@@ -61,6 +61,7 @@ class vmtkSeedSelector(object):
     def Execute(self):
         pass
 
+
 class vmtkPickPointSeedSelector(vmtkSeedSelector):
 
     def __init__(self):
@@ -71,11 +72,15 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
         self.OwnRenderer = 0
         self.Script = None
         self.Opacity = 1
+        self.continue_ = 0
 
     def UndoCallback(self, obj):
         self.InitializeSeeds()
         self.PickedSeeds.Modified()
         self.vmtkRenderer.RenderWindow.Render()
+
+    def ContinueCallback(self, obj):
+        self.continue_ = 1
 
     def PickCallback(self, obj):
         picker = vtk.vtkCellPicker()
@@ -140,6 +145,7 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
 
         ##self.vmtkRenderer.RenderWindowInteractor.AddObserver("KeyPressEvent", self.KeyPressed)
         self.vmtkRenderer.AddKeyBinding('u','Undo.',self.UndoCallback)
+        self.vmtkRenderer.AddKeyBinding('c','continue.',self.ContinueCallback)
         self.vmtkRenderer.AddKeyBinding('space','Add points.',self.PickCallback)
 
         surfaceMapper = vtk.vtkPolyDataMapper()
@@ -163,23 +169,28 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
         self.InputInfo('Please position the mouse and press space to add point on vessel wall near each Inlet location, \'u\' to undo\n')
 
         any = 0
-        while any == 0:
+        continue_ = 0
+        while (any == 0) and (continue_ == 0):
             self.InitializeSeeds()
             self.vmtkRenderer.Render()
             any = self.PickedSeedIds.GetNumberOfIds()
+            continue_ = self.continue_
         self._TargetSeedIds.DeepCopy(self.PickedSeedIds)
 
         self.InputInfo('Please position the mouse and press space to add point on vessel wall near each Outlet location, \'u\' to undo\n')
 
         any = 0
-        while any == 0:
+        continue_ = 0
+        while (any == 0) and (continue_ == 0):
             self.InitializeSeeds()
             self.vmtkRenderer.Render()
             any = self.PickedSeedIds.GetNumberOfIds()
+            continue_ = self.continue_
         self._OutletSeedIds.DeepCopy(self.PickedSeedIds)
 
         if self.OwnRenderer:
             self.vmtkRenderer.Deallocate()
+
 
 class vmtksubsetremesh():
 
@@ -265,7 +276,6 @@ class vmtksubsetremesh():
         self.Surface = surfaceRemeshing.GetOutput()
 
 
-
 class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
 
     def __init__(self):
@@ -273,6 +283,7 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
         pypes.pypeScript.__init__(self)
 
         self.Centerlines = None
+        self.BoundaryReference = None
         self.FrenetTangentArrayName = 'FrenetTangent'
         self.FrenetNormalArrayName = 'FrenetNormal'
 
@@ -284,18 +295,24 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
 
         self.SourcePoints = []
         self.TargetPoints = []
+        self.MainBodyPointId = None
+
+        self.Interactive = 1
 
         self.CleanOutput = 1
         self.remesh = 1
 
-
-        self.SetScriptName('vmtksurfaceclippercenterline')
+        self.SetScriptName('vmtksurfaceclippercenterline2')
         self.SetScriptDoc('interactively clip a tubular surface with normals estimated from centerline tangents')
         self.SetInputMembers([
             ['Surface','i','vtkPolyData',1,'','the input surface','vmtksurfacereader'],
             ['Centerlines','centerlines','vtkPolyData',1,'','the input centerlines','vmtksurfacereader'],
+            ['BoundaryReference','boundaryreference','vtkPolyData',1,'','the input boundary reference file', 'vmtksurfacereader'],
             ['FrenetTangentArrayName','frenettangentarray','str',1,'','name of the array where centerline tangent vectors of the Frenet reference system are stored'],
-            ['FrenetNormalArrayName','frenetnormalarray','str',1,'','name of the array where centerline normal vectors of the Frenet reference system are stored']
+            ['FrenetNormalArrayName','frenetnormalarray','str',1,'','name of the array where centerline normal vectors of the Frenet reference system are stored'],
+            ['Interactive','interactive','bool',1],
+            ['MainBodyPointId', 'mainbodypointid', 'int',1,'(0.0,)'],
+            ['vmtkRenderer','renderer','vmtkRenderer',1,'','external renderer']
             ])
         self.SetOutputMembers([
             ['Surface','o','vtkPolyData',1,'','the output surface','vmtksurfacewriter'],
@@ -310,29 +327,68 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
         if self.Centerlines == None:
             self.PrintError('Error: No input centerlines.')
 
-        if not self.vmtkRenderer:
-            self.vmtkRenderer = vmtkrenderer.vmtkRenderer()
-            self.vmtkRenderer.Initialize()
-            self.OwnRenderer = 1
+        if self.Interactive:
 
-        self.SeedSelector = vmtkPickPointSeedSelector()
-        self.SeedSelector.vmtkRenderer = self.vmtkRenderer
-        self.SeedSelector.Script = self
+            if not self.vmtkRenderer:
+                self.vmtkRenderer = vmtkrenderer.vmtkRenderer()
+                self.vmtkRenderer.Initialize()
+                self.OwnRenderer = 1
 
-        self.SeedSelector.SetSurface(self.Surface)
-        self.SeedSelector.InputInfo = self.InputInfo
-        self.SeedSelector.InputText = self.InputText
-        self.SeedSelector.OutputText = self.OutputText
-        self.SeedSelector.PrintError = self.PrintError
-        self.SeedSelector.PrintLog = self.PrintLog
-        self.SeedSelector.Execute()
+            self.SeedSelector = vmtkPickPointSeedSelector()
+            self.SeedSelector.vmtkRenderer = self.vmtkRenderer
+            self.SeedSelector.Script = self
 
-        mainBodySeedIds = self.SeedSelector.GetMainBodySeedIds()
-        mainBodySeedId = mainBodySeedIds.GetId(0)
+            self.SeedSelector.SetSurface(self.Surface)
+            self.SeedSelector.InputInfo = self.InputInfo
+            self.SeedSelector.InputText = self.InputText
+            self.SeedSelector.OutputText = self.OutputText
+            self.SeedSelector.PrintError = self.PrintError
+            self.SeedSelector.PrintLog = self.PrintLog
+            self.SeedSelector.Execute()
+
+            mainBodySeedIds = self.SeedSelector.GetMainBodySeedIds()
+            mainBodySeedId = mainBodySeedIds.GetId(0)
+
+            targetSeedIds = self.SeedSelector.GetTargetSeedIds()
+            outletSeedIds = self.SeedSelector.GetOutletSeedIds()
+
+        else:
+            if self.BoundaryReference == None:
+                self.PrintError('Error: No Boundary reference system to define clipping location.')
+            if self.MainBodyPointId == None:
+                self.PrintError('Error: No main body point specified with -mainbodypointid.')
+
+            locator_pt = vtk.vtkPointLocator()
+            locator_pt.SetDataSet(self.Surface)
+            locator_pt.BuildLocator()
+
+            locator_ctr = vtk.vtkPointLocator()
+            locator_ctr.SetDataSet(self.Centerlines)
+            locator_ctr.BuildLocator()
+
+            targetSeedIds = vtk.vtkIdList()
+            outletSeedIds = vtk.vtkIdList()
+            #print(self.BoundaryReference)
+            for i in range(self.BoundaryReference.GetNumberOfPoints()):
+                pt = self.BoundaryReference.GetPoint(i)
+                br_vector = self.BoundaryReference.GetPointData().GetArray("BoundaryNormals").GetTuple(i)
+
+                surf_ptId = locator_pt.FindClosestPoint(pt)
+                ctr_ptId = locator_ctr.FindClosestPoint(pt)
+
+                ctr_tangent = self.Centerlines.GetPointData().GetArray(self.FrenetTangentArrayName).GetTuple(ctr_ptId)
+
+                direction = vtk.vtkMath.Dot(br_vector, ctr_tangent)
+                if(direction < 0.0):
+                    # outlet normal opposite centerline tangent
+                    targetSeedIds.InsertNextId(surf_ptId)
+                else:
+                    outletSeedIds.InsertNextId(surf_ptId)
+
+            mainBodySeedId = self.MainBodyPointId
+
+        # set the point closest to the surface we want to keep
         mainBodyPoint = self.Surface.GetPoint(mainBodySeedId)
-
-        targetSeedIds = self.SeedSelector.GetTargetSeedIds()
-        outletSeedIds = self.SeedSelector.GetOutletSeedIds()
 
         surfaceCleaner = vtk.vtkCleanPolyData()
         surfaceCleaner.SetInputData(self.Surface)
@@ -409,7 +465,6 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
                 vertex.GetPointIds().InsertId(0, seed_count)
                 #vertex.GetPoints().SetPoint(seed_count, centerlinePoint)
                 vertices.InsertNextCell(vertex)
-
 
                 if( seed_type == "outlets"):
                     # outward facing normal
@@ -716,7 +771,6 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
                 #         if(dist > -1.0E-7 and dist < 1.0E-7 ):
                 #             print("dist 2", dist)
 
-
                 # locator = vtk.vtkPointLocator()
                 # locator.SetDataSet(surfaceTriangulator2.GetOutput())
                 # locator.BuildLocator()
@@ -745,10 +799,15 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
                 #clipper.InsideOutOff()
                 clipper.Update()
 
-                # writer7 = vtk.vtkXMLPolyDataWriter()
-                # writer7.SetFileName("clipper_test{0}.vtp".format(seed_count))
-                # writer7.SetInputConnection(clipper.GetOutputPort())
-                # writer7.Update()
+                writer7 = vtk.vtkXMLPolyDataWriter()
+                writer7.SetFileName("clipper_test{0}.vtp".format(seed_count))
+                writer7.SetInputConnection(clipper.GetOutputPort())
+                writer7.Update()
+
+                writer8 = vtk.vtkXMLPolyDataWriter()
+                writer8.SetFileName("clipped_test{0}.vtp".format(seed_count))
+                writer8.SetInputConnection(clipper.GetClippedOutputPort())
+                writer8.Update()
 
                 connectivity = vtk.vtkPolyDataConnectivityFilter()
                 connectivity.SetInputConnection(clipper.GetOutputPort())
@@ -799,7 +858,7 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
         #writer7.SetDataModeToAscii()
         #writer7.SetInputData(polydata)
         #writer7.Update()
-        
+
         self.BoundaryDirection = polydata
 
         self.Surface = clippedSurface
