@@ -24,11 +24,6 @@ endif (VTK_VMTK_CONTRIB)
 
 include (${VMTK_SOURCE_DIR}/CMake/CMakeOptions.cmake)
 
-configure_file(
-  ${VTK_VMTK_SOURCE_DIR}/vtkvmtkConfigure.h.in
-  ${VTK_VMTK_BINARY_DIR}/vtkvmtkConfigure.h
-  )                                                                                                  
-
 if(APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
@@ -75,11 +70,6 @@ include_directories (${VTK_VMTK_SOURCE_DIR}/Utilities/vtkvmtkITK)
 include_directories (${VTK_VMTK_BINARY_DIR})
 
 set(VTK_DOXYGEN_HOME ${VTK_VMTK_SOURCE_DIR}/Utilities/Doxygen)
-
-file(GLOB files "${VTK_VMTK_BINARY_DIR}/vtkvmtkConfigure*.h")
-install(FILES ${files}
-  DESTINATION ${VTK_VMTK_INSTALL_INCLUDE_DIR}
-  COMPONENT Development)
 
 if (VTK_WRAP_PYTHON AND VTK_VMTK_WRAP_PYTHON)
   include_directories (${VTK_PYTHON_INCLUDE_DIR})

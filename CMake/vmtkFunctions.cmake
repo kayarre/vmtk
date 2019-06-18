@@ -50,7 +50,7 @@ function(vmtk_build_library)
       endforeach()
       target_link_libraries(${lib_name} ${vmtk_target_link_libs})
     else (APPLE)
-      target_link_libraries(${lib_name} ${VMTK_LIB_TARGET_LINK_LIBRARIES})
+      target_link_libraries(${lib_name} PUBLIC ${VMTK_LIB_TARGET_LINK_LIBRARIES})
     endif (APPLE)
   endif()
 
@@ -60,6 +60,11 @@ function(vmtk_build_library)
     ARCHIVE DESTINATION ${VTK_VMTK_INSTALL_LIB_DIR} COMPONENT Development
     RUNTIME DESTINATION ${VTK_VMTK_INSTALL_BIN_DIR} COMPONENT RuntimeExecutables
   )
+
+  target_include_directories(${lib_name} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<INSTALL_INTERFACE:${VTK_VMTK_INSTALL_INCLUDE_DIR}>
+    )
 
   file(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
   install(FILES ${files}
