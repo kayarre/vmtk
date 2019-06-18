@@ -8,7 +8,7 @@ include(${VMTK_SOURCE_DIR}/CMake/vtkMacroKitPythonWrap.cmake)
 function(vmtk_build_library)
   set(options)
   set(oneValueArgs NAME)
-  set(multiValueArgs SRCS TARGET_LINK_LIBRARIES INCLUDE_DIRECTORIES)
+  set(multiValueArgs SRCS TARGET_LINK_LIBRARIES)
   cmake_parse_arguments(VMTK_LIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   set(expected_defined_vars NAME SRCS)
@@ -18,10 +18,6 @@ function(vmtk_build_library)
       message(FATAL_ERROR "error: ${var} parameter is mandatory !")
     endif()
   endforeach()
-
-  if(VMTK_LIB_INCLUDE_DIRECTORIES)
-    include_directories(${VMTK_LIB_INCLUDE_DIRECTORIES})
-  endif()
 
   set(lib_name ${VMTK_LIB_NAME})
 
