@@ -21,3 +21,18 @@ vmtk_build_library(
   SRCS ${VTK_VMTK_COMMON_SRCS}
   TARGET_LINK_LIBRARIES ${VTK_VMTK_COMMON_TARGET_LINK_LIBRARIES}
   )
+
+#
+# vtkvmtkConfigure.h
+#
+configure_file(
+  ${VTK_VMTK_SOURCE_DIR}/vtkvmtkConfigure.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/vtkvmtkConfigure.h
+  )
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/vtkvmtkConfigure.h
+  DESTINATION ${VTK_VMTK_INSTALL_INCLUDE_DIR}
+  COMPONENT Development
+  )
+target_include_directories(vtkvmtkCommon PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> # For vtkvmtkConfigure.h
+  )

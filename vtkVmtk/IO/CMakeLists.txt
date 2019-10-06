@@ -1,4 +1,6 @@
-set(VTK_VMTK_IO_TARGET_LINK_LIBRARIES )
+set(VTK_VMTK_IO_TARGET_LINK_LIBRARIES
+  vtkvmtkCommon
+  )
 
 set( VTK_VMTK_IO_COMPONENTS
 vtkCommonCore

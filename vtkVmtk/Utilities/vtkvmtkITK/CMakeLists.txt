@@ -1,4 +1,7 @@
-set(vtkvmtkITK_TARGET_LINK_LIBRARIES ${ITK_LIBRARIES})
+set(vtkvmtkITK_TARGET_LINK_LIBRARIES
+  vtkvmtkCommon
+  ${ITK_LIBRARIES}
+  )
 
 set( vtkvmtkITK_COMPONENTS
 vtkIOImage

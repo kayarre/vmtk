@@ -53,7 +53,7 @@ class vmtkSurfaceBooleanOperation(pypes.pypeScript):
         if self.Surface2 == None:
             self.PrintError('Error: No Surface2.')
 
-        booleanOperationFilter = vtk.vtkBooleanOperationPolyDataFilter()
+        booleanOperationFilter = vtk.vtkLoopBooleanPolyDataFilter()
         booleanOperationFilter.SetInputData(0,self.Surface)
         booleanOperationFilter.SetInputData(1,self.Surface2)
         if self.Operation == 'union':

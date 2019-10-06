@@ -1,32 +1,24 @@
-# Tell the user project where to find headers and libraries
-set(VMTK_CPP_SOURCE_DIRS "@VMTK_SOURCE_DIR@/vtkVmtk")
+set(VMTK_VERSION_MAJOR @VMTK_VERSION_MAJOR@)
+set(VMTK_VERSION_MINOR @VMTK_VERSION_MINOR@)
+set(VMTK_VERSION_PATCH @VMTK_VERSION_PATCH@)
+set(VMTK_VERSION "@VMTK_VERSION@")
 
-set(VMTK_INCLUDE_DIRS
-  ${VMTK_CPP_SOURCE_DIRS}
-  ${VMTK_CPP_SOURCE_DIRS}/Common
-  ${VMTK_CPP_SOURCE_DIRS}/ComputationalGeometry
-  ${VMTK_CPP_SOURCE_DIRS}/Contrib
-  ${VMTK_CPP_SOURCE_DIRS}/DifferentialGeometry
-  ${VMTK_CPP_SOURCE_DIRS}/IO
-  ${VMTK_CPP_SOURCE_DIRS}/Misc
-  ${VMTK_CPP_SOURCE_DIRS}/Segmentation
-  "@VMTK_BINARY_DIR@"
-  "@VMTK_BINARY_DIR@/vtkVmtk"
-)
-
-set(VMTK_BUILD_SETTINGS_FILE
-  "@VMTK_BINARY_DIR@/VMTKBuildSettings.cmake"
-)
-
-include(
-  "@VMTK_BINARY_DIR@/VMTK-Targets.cmake"
-)
-
-set(VMTK_LIBRARY_DIRS "@VMTK_BINARY_DIR@/bin")
+include("${CMAKE_CURRENT_LIST_DIR}/VMTKConfigVersion.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/VMTK-Targets.cmake")
 
 # VMTK VTK wrap hierarchy files
 @VMTK_WRAP_HIERARCHY_FILES_CONFIG@
 
-set(VMTK_USE_FILE
-  "@VMTK_BINARY_DIR@/VMTKUse.cmake"
-)
+# Depcreated. Use imported targets instead.
+set(VMTK_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/VMTKUse.cmake")
+
+set(VMTK_LIBRARIES
+  VMTK::vtkvmtkITK
+  VMTK::vtkvmtkCommon
+  VMTK::vtkvmtkComputationalGeometry
+  VMTK::vtkvmtkDifferentialGeometry
+  VMTK::vtkvmtkIO
+  VMTK::vtkvmtkMisc
+  VMTK::vtkvmtkSegmentation
+  VMTK::vtkvmtkRendering
+  )
