@@ -7,7 +7,7 @@
 ## Version:   $Revision: 1.8 $
 
 ##   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-##   See LICENCE file for details.
+##   See LICENSE file for details.
 
 ##      This software is distributed WITHOUT ANY WARRANTY; without even 
 ##      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -39,10 +39,10 @@ class vmtkSurfaceConnectivity(pypes.pypeScript):
         self.CleanOutput = 0
 
         self.SetScriptName('vmtksurfaceconnectivity')
-        self.SetScriptDoc('extract the largest connected region, the closest point-connected region or the scalar-connected region from a surface')
+        self.SetScriptDoc('extract the largest connected region, the closest point-connected region, the scalar-connected region from a surface, or all connected regions of a surface tagged with an id')
         self.SetInputMembers([
             ['Surface','i','vtkPolyData',1,'','the input surface','vmtksurfacereader'],
-            ['Method','method','str',1,'["largest","closest"]','connectivity method'],
+            ['Method','method','str',1,'["largest","closest", "all"]','connectivity method'],
             ['ClosestPoint','closestpoint','float',3,'','coordinates of the closest point'],
             ['ReferenceSurface','r','vtkPolyData',1,'','the reference surface, whose barycenter will be used as closest point for the connectivity filter','vmtksurfacereader'],
             ['CleanOutput','cleanoutput','bool',1,'','clean the unused points in the output'],
@@ -58,7 +58,7 @@ class vmtkSurfaceConnectivity(pypes.pypeScript):
         if self.Surface == None:
             self.PrintError('Error: No input surface.')
 
-        if (self.GroupId != -1) & (self.GroupIdsArrayName!=''):
+        if (self.GroupId != -1) and (self.GroupIdsArrayName!=''):
             self.Surface.GetPointData().SetActiveScalars(self.GroupIdsArrayName)
 
         barycenter = [0.0,0.0,0.0]
@@ -84,9 +84,13 @@ class vmtkSurfaceConnectivity(pypes.pypeScript):
                 connectivityFilter.SetClosestPoint(self.ClosestPoint)
             else:
                 connectivityFilter.SetClosestPoint(barycenter)
+        elif self.Method == 'all':
+            connectivityFilter.SetExtractionModeToAllRegions()
+            connectivityFilter.ColorRegionsOn()
+
         if self.GroupId != -1:
             connectivityFilter.ScalarConnectivityOn()
-            scalarRange = [self.GroupId,self .GroupId]
+            scalarRange = [self.GroupId,self.GroupId]
             connectivityFilter.SetScalarRange(scalarRange)
         connectivityFilter.Update()
 

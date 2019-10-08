@@ -7,7 +7,7 @@
 ## Version:   $Revision: 1.8 $
 
 ##   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-##   See LICENCE file for details.
+##   See LICENSE file for details.
 
 ##      This software is distributed WITHOUT ANY WARRANTY; without even 
 ##      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -330,7 +330,7 @@ class vmtkRenderer(pypes.pypeScript):
             #self.TextActorStd.SetPosition(self.PositionStd)
             #self.Renderer.AddActor(self.TextActorStd)
 
-            fontSize = self._GetScreenFontSize()
+            fontSize = int(self._GetScreenFontSize())
 
             self.TextActor = vtk.vtkTextActor()
             self.TextActor.GetTextProperty().SetFontSize(fontSize)

@@ -1,17 +1,15 @@
-SUBDIRS(
-  Doxygen
-  OpenNL
-  #Stellar_1.0
-  vtkvmtkITK
-  )
+add_subdirectory(Doxygen)
+add_subdirectory(OpenNL)
+#add_subdirectory(Stellar_1.0)
+add_subdirectory(vtkvmtkITK)
 
-IF (DEFINED VMTK_BUILD_TETGEN)
-  IF (VMTK_BUILD_TETGEN AND VTK_VMTK_BUILD_TETGEN)
-    SUBDIRS(tetgen1.4.3)
-  ENDIF (VMTK_BUILD_TETGEN AND VTK_VMTK_BUILD_TETGEN)
-ELSE (DEFINED VMTK_BUILD_TETGEN) 
-  IF (VTK_VMTK_BUILD_TETGEN)
-  	SUBDIRS(tetgen1.4.3)
-  ENDIF (VTK_VMTK_BUILD_TETGEN)
-ENDIF (DEFINED VMTK_BUILD_TETGEN)
+if (DEFINED VMTK_BUILD_TETGEN)
+  if (VMTK_BUILD_TETGEN AND VTK_VMTK_BUILD_TETGEN)
+    add_subdirectory(tetgen1.4.3)
+  endif (VMTK_BUILD_TETGEN AND VTK_VMTK_BUILD_TETGEN)
+else (DEFINED VMTK_BUILD_TETGEN) 
+  if (VTK_VMTK_BUILD_TETGEN)
+    add_subdirectory(tetgen1.4.3)
+  endif (VTK_VMTK_BUILD_TETGEN)
+endif (DEFINED VMTK_BUILD_TETGEN)
 

@@ -7,7 +7,7 @@ Date:      Sat Feb 19 15:14:48 CET 2011
 Version:   Revision: 1.0
                                                                                                                                     
   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-  See LICENCE file for details.
+  See LICENSE file for details.
 
   Portions of this code are covered under the VTK copyright.
   See VTKCopyright.txt or http://www.kitware.com/VTKCopyright.htm 
@@ -84,16 +84,16 @@ int vtkvmtkTetGenReader::RequestData(
     return 1;
     }
 
-  if (!this->FileName)
+  if (!this->GetFileName())
     {
     vtkErrorMacro(<<"FileName not set.");
     return 1;
     }
 
-  std::string nodeFileName = this->FileName;
+  std::string nodeFileName = this->GetFileName();
   nodeFileName += ".node";
 
-  std::string eleFileName = this->FileName;
+  std::string eleFileName = this->GetFileName();
   eleFileName += ".ele";
 
   ifstream nodeStream(nodeFileName.c_str());

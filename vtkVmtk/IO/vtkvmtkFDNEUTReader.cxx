@@ -7,7 +7,7 @@ Date:      $Date: 2006/04/06 16:47:47 $
 Version:   $Revision: 1.8 $
                                                                                                                                     
   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-  See LICENCE file for details.
+  See LICENSE file for details.
 
   Portions of this code are covered under the VTK copyright.
   See VTKCopyright.txt or http://www.kitware.com/VTKCopyright.htm 
@@ -65,14 +65,14 @@ int vtkvmtkFDNEUTReader::RequestData(
     return 1;
     }
 
-  if (!this->FileName)
+  if (!this->GetFileName())
     {
     vtkErrorMacro(<<"FileName not set.");
     return 1;
     }
         
   FILE* FDNEUTFile;
-  FDNEUTFile = fopen(this->FileName,"r");
+  FDNEUTFile = fopen(this->GetFileName(),"r");
 
   if (!FDNEUTFile)
     {

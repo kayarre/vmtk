@@ -1,6 +1,6 @@
-PROJECT(VMTK_SCRIPTS)
+project(VMTK_SCRIPTS)
 
-SET(SCRIPTS_SRCS
+set(SCRIPTS_SRCS
   __init__.py
   vmtkmeshcompare.py
   vmtkimagecompare.py
@@ -31,6 +31,7 @@ SET(SCRIPTS_SRCS
   vmtkcenterlines.py
   vmtkcenterlinesections.py
   vmtkcenterlinesmoothing.py
+  vmtkcenterlinesnetwork.py
   vmtkcenterlineviewer.py
   vmtkdelaunayvoronoi.py
   vmtkdistancetocenterlines.py
@@ -58,12 +59,14 @@ SET(SCRIPTS_SRCS
   vmtkimageviewer.py
   vmtkimagevoipainter.py
   vmtkimagevoiselector.py
+  vmtkimagevolumeviewer.py
   vmtkimagewriter.py
   vmtklevelsetsegmentation.py
   vmtklineartoquadratic.py
   vmtklineresampling.py
   vmtklocalgeometry.py
   vmtkmarchingcubes.py
+  vmtkcenterlineimage.py
   vmtkmesharrayoperation.py
   vmtkmeshboundaryinspector.py
   vmtkmeshbranchclipper.py
@@ -113,6 +116,7 @@ SET(SCRIPTS_SRCS
   vmtksurfaceclipper.py
   vmtksurfacecliploop.py
   vmtksurfaceconnectivity.py
+  vmtksurfaceconnectivityselector.py
   vmtksurfacecurvature.py
   vmtksurfacedecimation.py
   vmtksurfacedistance.py
@@ -132,6 +136,7 @@ SET(SCRIPTS_SRCS
   vmtksurfacescaling.py
   vmtksurfacesmoothing.py
   vmtksurfacesubdivision.py
+  vmtksurfacetobinaryimage.py
   vmtksurfacetransform.py
   vmtksurfacetransforminteractive.py
   vmtksurfacetransformtoras.py
@@ -144,44 +149,46 @@ SET(SCRIPTS_SRCS
   vmtktetringenerator.py
   )
 
-SET(MODULE_SRCS
+set(MODULE_SRCS
   vmtkscripts.py
   )
 
-OPTION(VMTK_CONTRIB_SCRIPTS "Install modules from the vmtkScripts/contrib directory." OFF)
+option(VMTK_CONTRIB_SCRIPTS "Install modules from the vmtkScripts/contrib directory." OFF)
 
-IF (VMTK_CONTRIB_SCRIPTS)
-  SUBDIRS(contrib)
-ENDIF (VMTK_CONTRIB_SCRIPTS)
+if (VMTK_CONTRIB_SCRIPTS)
+  add_subdirectory(contrib)
+endif (VMTK_CONTRIB_SCRIPTS)
 
-IF(NOT VMTK_SCRIPTS_INSTALL_BIN_DIR)
-  SET(VMTK_SCRIPTS_INSTALL_BIN_DIR bin)
-ENDIF(NOT VMTK_SCRIPTS_INSTALL_BIN_DIR)
+if(NOT VMTK_SCRIPTS_INSTALL_BIN_DIR)
+  set(VMTK_SCRIPTS_INSTALL_BIN_DIR bin)
+endif(NOT VMTK_SCRIPTS_INSTALL_BIN_DIR)
 
-IF(NOT VMTK_SCRIPTS_INSTALL_LIB_DIR)
-  SET(VMTK_SCRIPTS_INSTALL_LIB_DIR lib/${VMTK_PYTHON_VERSION}/site-packages/vmtk)
-ENDIF(NOT VMTK_SCRIPTS_INSTALL_LIB_DIR)
+if(NOT VMTK_SCRIPTS_INSTALL_LIB_DIR)
+  set(VMTK_SCRIPTS_INSTALL_LIB_DIR lib/${VMTK_PYTHON_VERSION}/site-packages/vmtk)
+endif(NOT VMTK_SCRIPTS_INSTALL_LIB_DIR)
 
-FOREACH (SCRIPT_FILE  ${SCRIPTS_SRCS})
-  CONFIGURE_FILE(${VMTK_SCRIPTS_SOURCE_DIR}/${SCRIPT_FILE} ${VMTK_SCRIPTS_BINARY_DIR}/${SCRIPT_FILE} COPYONLY)
-ENDFOREACH (SCRIPT_FILE)
+add_subdirectory(resources)
 
-INSTALL(FILES ${SCRIPTS_SRCS} ${MODULE_SRCS}
+foreach (SCRIPT_FILE  ${SCRIPTS_SRCS})
+  configure_file(${VMTK_SCRIPTS_SOURCE_DIR}/${SCRIPT_FILE} ${VMTK_SCRIPTS_BINARY_DIR}/${SCRIPT_FILE} COPYONLY)
+endforeach (SCRIPT_FILE)
+
+install(FILES ${SCRIPTS_SRCS} ${MODULE_SRCS}
   DESTINATION ${VMTK_SCRIPTS_INSTALL_LIB_DIR}
   COMPONENT PythonRuntimeLibraries)
 
-IF (NOT WIN32 AND NOT VMTK_MINIMAL_INSTALL)
+if (NOT WIN32 AND NOT VMTK_MINIMAL_INSTALL)
 
-SET (STRIPPED_SCRIPTS_SRCS )
-FOREACH (SCRIPT_FILE  ${SCRIPTS_SRCS})
-  STRING(REGEX REPLACE ".py$" "" STRIPPED_SCRIPT_FILE ${SCRIPT_FILE})
-  CONFIGURE_FILE(${PYPES_SOURCE_DIR}/pyperun.py ${VMTK_SCRIPTS_BINARY_DIR}/${STRIPPED_SCRIPT_FILE})
-  SET (STRIPPED_SCRIPTS_SRCS ${STRIPPED_SCRIPTS_SRCS} ${VMTK_SCRIPTS_BINARY_DIR}/${STRIPPED_SCRIPT_FILE})
-ENDFOREACH (SCRIPT_FILE)
+set (STRIPPED_SCRIPTS_SRCS )
+foreach (SCRIPT_FILE  ${SCRIPTS_SRCS})
+  string(REGEX REPLACE ".py$" "" STRIPPED_SCRIPT_FILE ${SCRIPT_FILE})
+  configure_file(${PYPES_SOURCE_DIR}/pyperun.py ${VMTK_SCRIPTS_BINARY_DIR}/${STRIPPED_SCRIPT_FILE})
+  set (STRIPPED_SCRIPTS_SRCS ${STRIPPED_SCRIPTS_SRCS} ${VMTK_SCRIPTS_BINARY_DIR}/${STRIPPED_SCRIPT_FILE})
+endforeach (SCRIPT_FILE)
 
-INSTALL(PROGRAMS ${STRIPPED_SCRIPTS_SRCS}
+install(PROGRAMS ${STRIPPED_SCRIPTS_SRCS}
   DESTINATION ${VMTK_SCRIPTS_INSTALL_BIN_DIR}
   COMPONENT RuntimeExecutables)
 
-ENDIF (NOT WIN32 AND NOT VMTK_MINIMAL_INSTALL)
+endif (NOT WIN32 AND NOT VMTK_MINIMAL_INSTALL)
 

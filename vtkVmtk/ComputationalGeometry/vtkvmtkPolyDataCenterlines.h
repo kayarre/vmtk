@@ -7,7 +7,7 @@ Date:      $Date: 2006/07/17 09:52:56 $
 Version:   $Revision: 1.6 $
 
   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-  See LICENCE file for details.
+  See LICENSE file for details.
 
   Portions of this code are covered under the VTK copyright.
   See VTKCopyright.txt or http://www.kitware.com/VTKCopyright.htm 
@@ -18,9 +18,9 @@ Version:   $Revision: 1.6 $
      PURPOSE.  See the above copyright notices for more information.
 
 =========================================================================*/
-  // .NAME vtkvmtkPolyDataCenterlines - Compute centerlines from surface.
-  // .SECTION Description
-  // ...
+// .NAME vtkvmtkPolyDataCenterlines - Compute centerlines from surface.
+// .SECTION Description
+// ...
 
 #ifndef __vtkvmtkPolyDataCenterlines_h
 #define __vtkvmtkPolyDataCenterlines_h
@@ -56,8 +56,10 @@ class VTK_VMTK_COMPUTATIONAL_GEOMETRY_EXPORT vtkvmtkPolyDataCenterlines : public
   vtkSetObjectMacro(DelaunayTessellation,vtkUnstructuredGrid);
   vtkGetObjectMacro(DelaunayTessellation,vtkUnstructuredGrid);
 
+  vtkSetObjectMacro(VoronoiDiagram,vtkPolyData);
   vtkGetObjectMacro(VoronoiDiagram,vtkPolyData);
 
+  vtkSetObjectMacro(PoleIds,vtkIdList);
   vtkGetObjectMacro(PoleIds,vtkIdList);
 
   vtkSetStringMacro(RadiusArrayName);
@@ -101,6 +103,14 @@ class VTK_VMTK_COMPUTATIONAL_GEOMETRY_EXPORT vtkvmtkPolyDataCenterlines : public
   vtkGetMacro(GenerateDelaunayTessellation,int);
   vtkBooleanMacro(GenerateDelaunayTessellation,int);
 
+  vtkSetMacro(GenerateVoronoiDiagram,int);
+  vtkGetMacro(GenerateVoronoiDiagram,int);
+  vtkBooleanMacro(GenerateVoronoiDiagram,int);
+
+  vtkSetMacro(StopFastMarchingOnReachingTarget,int);
+  vtkGetMacro(StopFastMarchingOnReachingTarget,int);
+  vtkBooleanMacro(StopFastMarchingOnReachingTarget,int);
+
   vtkSetMacro(DelaunayTolerance,double);
   vtkGetMacro(DelaunayTolerance,double);
 
@@ -141,6 +151,8 @@ class VTK_VMTK_COMPUTATIONAL_GEOMETRY_EXPORT vtkvmtkPolyDataCenterlines : public
 
   double ResamplingStepLength;
 
+  int GenerateVoronoiDiagram;
+  int StopFastMarchingOnReachingTarget;
   int GenerateDelaunayTessellation;
   double DelaunayTolerance;
 

@@ -4,7 +4,7 @@
 ## Version:   1.4
 
 ##   Copyright (c) Richard Izzo, Luca Antiga, All rights reserved.
-##   See LICENCE file for details.
+##   See LICENSE file for details.
 
 ##      This software is distributed WITHOUT ANY WARRANTY; without even
 ##      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
@@ -115,7 +115,7 @@ function UpdateCondaChannel ($python_home, $channels) {
 function main () {
     InstallMiniconda $env:PYTHON_VERSION $env:PYTHON_ARCH $env:PYTHON
     UpdateConda $env:PYTHON
-    InstallCondaPackages $env:PYTHON "conda-build jinja2 anaconda-client"
+    InstallCondaPackages $env:PYTHON "conda-build==3.9.2 jinja2 anaconda-client"
     UpdateCondaChannel $env:PYTHON "vmtk"
 }
 
