@@ -35,6 +35,7 @@ class vmtkSurfaceCapper(pypes.pypeScript):
         self.Method = 'simple'
         self.ConstraintFactor = 1.0
         self.NumberOfRings = 8
+        self.Exclude = 0
 
         self.vmtkRenderer = None
         self.OwnRenderer = 0
@@ -50,6 +51,7 @@ class vmtkSurfaceCapper(pypes.pypeScript):
             ['ConstraintFactor','constraint','float',1,'','amount of influence of the shape of the surface near the boundary on the shape of the cap ("smooth" method only)'],
             ['NumberOfRings','rings','int',1,'(0,)','number of rings composing the cap ("smooth" method only)'],
             ['Interactive','interactive','bool',1],
+            ['Exclude','exclude','bool',1,'', 'create caps for all boundaries except those selected'],
             ['vmtkRenderer','renderer','vmtkRenderer',1,'','external renderer']
             ])
         self.SetOutputMembers([
@@ -130,15 +132,23 @@ class vmtkSurfaceCapper(pypes.pypeScript):
 
             ok = False
             while not ok:
-                labelString = self.InputText("Please input boundary ids: ",self.LabelValidator)
+                if(self.Exclude):
+                    labelString = self.InputText("Please input boundary ids to exclude: ",self.LabelValidator)
+                else:
+                    labelString = self.InputText("Please input boundary ids: ",self.LabelValidator)
                 labels = [int(label) for label in labelString.split()]
                 ok = True
                 for label in labels:
                     if label not in list(range(numberOfBoundaries)):
                         ok = False
 
-            for label in labels:
-                boundaryIds.InsertNextId(label)
+            if(self.Exclude):
+                for label in list(range(numberOfBoundaries)):
+                    if label not in labels:
+                        boundaryIds.InsertNextId(label)
+            else:
+                for label in labels:
+                    boundaryIds.InsertNextId(label)
 
         if self.Method == 'simple':
             capper = vtkvmtk.vtkvmtkSimpleCapPolyData()
