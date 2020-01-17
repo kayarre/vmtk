@@ -29,6 +29,7 @@ class vmtkSurfaceWarpByVector(pypes.pypeScript):
 
         pypes.pypeScript.__init__(self)
 
+        self.Input = None
         self.Surface = None
         self.CellEntityIdsArray = None
         self.WarpArrayName = None
@@ -46,25 +47,27 @@ class vmtkSurfaceWarpByVector(pypes.pypeScript):
             ['Surface','o','vtkPolyData',1,'','the output surface','vmtksurfacewriter']
             ])
 
-
-
-    def Execute(self):
-        from vmtk import vmtkscripts
-
-        if self.Surface == None:
-            self.PrintError('Error: no Surface.')
-
-        self.WarpArray = self.Surface.GetPointData().GetArray(self.WarpArrayName)
+    def Update(self):
+        self.WarpArray = self.Input.GetPointData().GetArray(self.WarpArrayName)
         if self.WarpArray == None:
-            self.PrintError('Error: no vector called '+self.VectorName+' defined on the surface')
+            self.PrintError('Error: no vector called '+self.WarpArrayName+' defined on the surface')
 
         warper = vtk.vtkWarpVector()
-        self.Surface.GetPointData().SetActiveVectors(self.WarpArrayName)
-        warper.SetInputData(self.Surface)
+        self.Input.GetPointData().SetActiveVectors(self.WarpArrayName)
+        warper.SetInputData(self.Input)
         warper.SetScaleFactor(self.ScaleFactor)
         warper.Update()
 
-        self.Surface = warper.GetOutput()
+        self.Input = warper.GetOutput()
+
+
+    def Execute(self):
+        if self.Surface == None:
+            self.PrintError('Error: no Surface.')
+
+        self.Input = self.Surface
+
+        self.Update()
 
 
 
