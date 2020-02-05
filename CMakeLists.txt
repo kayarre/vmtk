@@ -283,7 +283,7 @@ if(VMTK_SCRIPTS_ENABLED)
   #   ADD_SUBDIRECTORY(distribution)
   # endif(VMTK_ENABLE_DISTRIBUTION)
 
-  install(EXPORT VMTK-Targets DESTINATION ${VMTK_BINARY_DIR})
+  #install(EXPORT VMTK-Targets DESTINATION ${VMTK_BINARY_DIR})
 
   get_property(_wrap_hierarchy_targets GLOBAL PROPERTY VMTK_WRAP_HIERARCHY_TARGETS)
   if(_wrap_hierarchy_targets)
