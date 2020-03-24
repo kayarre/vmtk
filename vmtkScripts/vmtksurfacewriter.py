@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+## Modification of vmtksurfacewriter
+## Summary of changes: added mltiblockdataset writing capability
+
 ## Program:   VMTK
 ## Module:    $RCSfile: vmtksurfacewriter.py,v $
 ## Language:  Python
@@ -7,7 +10,7 @@
 ## Version:   $Revision: 1.13 $
 
 ##   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-##   See LICENSE file for details.
+##   See LICENCE file for details.
 
 ##      This software is distributed WITHOUT ANY WARRANTY; without even 
 ##      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -38,7 +41,7 @@ class vmtkSurfaceWriter(pypes.pypeScript):
         self.SetScriptDoc('write surface to disk')
         self.SetInputMembers([
             ['Surface','i','vtkPolyData',1,'','the input surface','vmtksurfacereader'],
-            ['Format','f','str',1,'["vtkxml","vtk","stl","ply","pointdata","tecplot"]','file format'],
+            ['Format','f','str',1,'["vtkxml","vtk","stl","ply","pointdata","tecplot","vtm"]','file format'],
             ['GuessFormat','guessformat','bool',1,'','guess file format from extension'],
             ['CellData','celldata','bool',1,'','write CellData when using pointdata format'],
             ['Mode','mode','str',1,'["ascii","binary"]','write files in ASCII or binary mode'],
@@ -47,6 +50,22 @@ class vmtkSurfaceWriter(pypes.pypeScript):
             ])
         self.SetOutputMembers([])
 
+    def WriteMultiBlockFile(self):
+        if (self.OutputFileName == ''):
+            self.PrintError('Error: no OutputFileName.')
+
+        self.PrintLog('Writing VTK XMLMultiBlock File.')
+        writer = vtk.vtkXMLMultiBlockDataWriter()
+        writer.SetInputData(self.Surface)
+        writer.SetFileName(self.OutputFileName)
+        #if self.Mode == "binary":
+        #    writer.SetFileTypeToBinary()
+        #elif self.Mode == "ascii":
+        #    writer.SetFileTypeToASCII()
+        writer.Write()
+
+       
+    
     def WriteVTKSurfaceFile(self):
         if (self.OutputFileName == ''):
             self.PrintError('Error: no OutputFileName.')
@@ -194,7 +213,7 @@ class vmtkSurfaceWriter(pypes.pypeScript):
 
         if self.Surface == None:
             if self.Input == None:
-                self.PrintError('Error: no Surface.')
+                self.PrintError('Error: no Surface for surfacewriter.')
             self.Surface = self.Input
 
         extensionFormats = {'vtp':'vtkxml', 
@@ -203,7 +222,8 @@ class vmtkSurfaceWriter(pypes.pypeScript):
                             'stl':'stl',
                             'ply':'ply',
                             'tec':'tecplot',
-                            'dat':'pointdata'}
+                            'dat':'pointdata',
+                            'vtm':'vtm'}
 
         if self.OutputFileName == 'BROWSER':
             import tkinter.filedialog
@@ -234,6 +254,8 @@ class vmtkSurfaceWriter(pypes.pypeScript):
             self.WritePointDataSurfaceFile()
         elif (self.Format == 'tecplot'):
             self.WriteTecplotSurfaceFile()
+        elif (self.Format == 'vtm'):
+            self.WriteMultiBlockFile()
         else:
             self.PrintError('Error: unsupported format '+ self.Format + '.')
 
