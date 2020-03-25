@@ -93,13 +93,32 @@ class vmtkSurfaceClipper(pypes.pypeScript):
             ['Transform','otransform','vtkTransform',1,'','the output widget transform']
             ])
     
+
+    def CleanAutoClip(self):
+        if not self.Surface.IsA('vtkPolyData'):
+            self.PrintError('Error: CleanAutoClip input is not PolyData.')
+            return
+
+        # Use connectivty to clean data of any fragments generated
+        Filter = vtk.vtkPolyDataConnectivityFilter()
+        Filter.SetInputData(self.Surface)
+        Filter.Update()
+        self.PrintLog('Distinct regions: ' + str(Filter.GetNumberOfExtractedRegions()))
+
+        if Filter.GetNumberOfExtractedRegions == 1:
+            self.PrintLog('Single region identified')
+            return
+
+        Filter.SetExtractionModeToLargestRegion()
+        Filter.Update()
+        self.Surface.DeepCopy(Filter.GetOutput())
+
     def AutoClip(self):
         # Check to see if ClipsIn is provided
         if self.ClipsIn == None:
             self.PrintError('Error: no AutoClip without ClipsIn')
         
         
-        import pdb; pdb.set_trace() 
         # Init AutoClipper/Function
         AutoClipper = vtk.vtkClipPolyData()
         AutoClipFunction = vtk.vtkPlanes()
@@ -117,6 +136,8 @@ class vmtkSurfaceClipper(pypes.pypeScript):
             AutoClipper.Update()
             self.Surface.DeepCopy(AutoClipper.GetOutput())
         
+        import pdb; pdb.set_trace() 
+        self.CleanAutoClip()
         self.PrintLog('AutoClip complete.')
 
     def NextBlockBounds(self):
