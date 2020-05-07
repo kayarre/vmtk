@@ -34,6 +34,7 @@ set(CONTRIB_SCRIPTS_SRCS
     vmtkpetergeneratesurface.py
     vmtkpeterresurface.py
     vmtkpetersurfaceclipper.py
+    vmtkendpointsections.py
 
   )
   
