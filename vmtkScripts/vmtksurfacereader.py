@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+## Modification of vmtksurfacereader by Peter Patalano
+## Summary of changes: added support for multiblockdataset reading
+
 ## Program:   VMTK
 ## Module:    $RCSfile: vmtksurfacereader.py,v $
 ## Language:  Python
@@ -7,7 +10,7 @@
 ## Version:   $Revision: 1.13 $
 
 ##   Copyright (c) Luca Antiga, David Steinman. All rights reserved.
-##   See LICENSE file for details.
+##   See LICENCE file for details.
 
 ##      This software is distributed WITHOUT ANY WARRANTY; without even 
 ##      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
@@ -35,7 +38,7 @@ class vmtkSurfaceReader(pypes.pypeScript):
         self.SetScriptName('vmtksurfacereader')
         self.SetScriptDoc('read a surface and store it in a vtkPolyData object')
         self.SetInputMembers([
-            ['Format','f','str',1,'["vtkxml","vtk","stl","ply","tecplot"]','file format'],
+            ['Format','f','str',1,'["vtkxml","vtk","stl","ply","tecplot","vtm"]','file format'],
             ['GuessFormat','guessformat','bool',1,'','guess file format from extension'],
             ['Surface','i','vtkPolyData',1,'','the input surface'],
             ['InputFileName','ifile','str',1,'','input file name']
@@ -52,6 +55,16 @@ class vmtkSurfaceReader(pypes.pypeScript):
         reader.SetFileName(self.InputFileName)
         reader.Update()
         self.Surface = reader.GetOutput()
+
+    def ReadMultiBlockFile(self):
+        if (self.InputFileName == ''):
+            self.PrintError('Error: no InputFileName.')
+        self.PrintLog('Reading MultiBlockData File.')
+        reader = vtk.vtkXMLMultiBlockDataReader()
+        reader.SetFileName(self.InputFileName)
+        reader.Update()
+        self.Surface = reader.GetOutput()
+
 
     def ReadVTKXMLSurfaceFile(self):
         if (self.InputFileName == ''):
@@ -180,14 +193,15 @@ class vmtkSurfaceReader(pypes.pypeScript):
 ##             cells.InsertNextCell(cellIds)
 
     def Execute(self):
-
+        self.PrintLog('Attempting to read surface... ')
         extensionFormats = {'vtp':'vtkxml',
                             'vtkxml':'vtkxml',
                             'vtk':'vtk',
                             'stl':'stl',
                             'ply':'ply',
                             'tec':'tecplot',
-                            'dat':'tecplot'}
+                            'dat':'tecplot',
+                            'vtm':'vtm'}
 
         if self.InputFileName == 'BROWSER':
             import tkinter.filedialog
@@ -216,6 +230,8 @@ class vmtkSurfaceReader(pypes.pypeScript):
             self.ReadPLYSurfaceFile()
         elif (self.Format == 'tecplot'):
             self.ReadTecplotSurfaceFile()
+        elif (self.Format == 'vtm'):
+            self.ReadMultiBlockFile()
         else:
             self.PrintError('Error: unsupported format '+ self.Format + '.')
 
