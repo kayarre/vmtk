@@ -28,6 +28,9 @@ __all__ = [
     'vmtk.vmtksurfacetonumpy',
     'vmtk.vmtksurfacewriter2',
     'vmtk.vmtkthreshold',
+    'vmtk.vmtkpetergeneratesurface.py',
+    'vmtk.vmtkpeterresurface.py',
+    'vmtk.vmtkpetersurfaceclipper.py',
     ]
 
 for item in __all__:
