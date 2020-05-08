@@ -11,6 +11,7 @@ __all__ = [
     'vmtk.vmtkbranchclipper',
     'vmtk.vmtkbranchextractor',
     'vmtk.vmtkbranchgeometry',
+    'vmtk.vmtkcenterlineimage',
     'vmtk.vmtkbranchmapping',
     'vmtk.vmtkbranchmetrics',
     'vmtk.vmtkbranchpatching',
@@ -27,6 +28,7 @@ __all__ = [
     'vmtk.vmtkcenterlinestonumpy',
     'vmtk.vmtkcenterlinesections',
     'vmtk.vmtkcenterlinesmoothing',
+    'vmtk.vmtkcenterlinesnetwork',
     'vmtk.vmtkcenterlineviewer',
     'vmtk.vmtkdelaunayvoronoi',
     'vmtk.vmtkdistancetocenterlines',
@@ -55,6 +57,7 @@ __all__ = [
     'vmtk.vmtkimagevesselenhancement',
     'vmtk.vmtkimagevoipainter',
     'vmtk.vmtkimagevoiselector',
+    'vmtk.vmtkimagevolumeviewer',
     'vmtk.vmtkimagewriter',
     'vmtk.vmtklevelsetsegmentation',
     'vmtk.vmtklineartoquadratic',
@@ -117,6 +120,7 @@ __all__ = [
     'vmtk.vmtksurfaceclipper',
     'vmtk.vmtksurfacecliploop',
     'vmtk.vmtksurfaceconnectivity',
+    'vmtk.vmtksurfaceconnectivityselector',
     'vmtk.vmtksurfacecurvature',
     'vmtk.vmtksurfacedecimation',
     'vmtk.vmtksurfacedistance',
@@ -136,6 +140,7 @@ __all__ = [
     'vmtk.vmtksurfacescaling',
     'vmtk.vmtksurfacesmoothing',
     'vmtk.vmtksurfacesubdivision',
+    'vmtk.vmtksurfacetobinaryimage',
     'vmtk.vmtksurfacetonumpy',
     'vmtk.vmtksurfacetransform',
     'vmtk.vmtksurfacetransforminteractive',
@@ -148,7 +153,7 @@ __all__ = [
     'vmtk.vmtktetgen',
     'vmtk.vmtktetringenerator',
     'vmtk.peterresurface', # custom script for resurfacing vessel following computational stenosis
-    #'vmtk.petergeneratesurface', # custom script for generating surface from image data
+    'vmtk.petergeneratesurface', # custom script for generating surface from image data
     'vmtk.testclippertransform', # custom script to test functionality of of Transforms in clipper
     'vmtk.petersurfaceclipper' # peter version of vmtksurfaceclipper which includes AutoClip functionality
     ]
