@@ -4,7 +4,7 @@ project(VMTK)
 
 # vmtk versions number
 set(VMTK_VERSION_MAJOR 1)
-set(VMTK_VERSION_MINOR 4)
+set(VMTK_VERSION_MINOR 5)
 set(VMTK_VERSION_PATCH 0)
 set(VMTK_VERSION
     "${VMTK_VERSION_MAJOR}.${VMTK_VERSION_MINOR}.${VMTK_VERSION_PATCH}")
@@ -69,6 +69,7 @@ option( USE_SYSTEM_VTK
   "Exclude VTK from SuperBuild and use an existing build instead." OFF )
 if( USE_SYSTEM_VTK )
   find_package( VTK REQUIRED )
+  message (STATUS "VTK_VERSION: ${VTK_VERSION}")
   if( ${VTK_VERSION_MAJOR} LESS 6 )
     include( ${VTK_USE_FILE} )
   endif( ${VTK_VERSION_MAJOR} LESS 6 )
@@ -81,6 +82,9 @@ option( VMTK_USE_SUPERBUILD
 
 # option( VMTK_USE_VTK7
 #  "Compile vmtk against VTK 7. OFF is VTK 6.3." ON )
+
+set( VTK_RELEASE_VERSION "9" CACHE STRING "Version of vtk" )
+set( ITK_RELEASE_VERSION "5" CACHE STRING "Version of vtk" )
 
 option( VMTK_USE_VTK8
   "Compile vmtk against VTK 8. OFF is VTK 7.1" ON )
@@ -231,9 +235,9 @@ if(NOT DEFINED VMTK_INSTALL_LIB_DIR)
   set(VMTK_INSTALL_LIB_DIR lib)
 endif(NOT DEFINED VMTK_INSTALL_LIB_DIR)
 
-if(NOT VMTK_INSTALL_INCLUDE_DIR)
+if(NOT DEFINED VMTK_INSTALL_INCLUDE_DIR)
   set(VMTK_INSTALL_INCLUDE_DIR include)
-endif(NOT VMTK_INSTALL_INCLUDE_DIR)
+endif(NOT DEFINED VMTK_INSTALL_INCLUDE_DIR)
 
 if(NOT DEFINED VMTK_MODULE_INSTALL_LIB_DIR)
   set(VMTK_MODULE_INSTALL_LIB_DIR ${VMTK_INSTALL_LIB_DIR}/${VMTK_PYTHON_VERSION}/site-packages/vmtk)
@@ -287,8 +291,6 @@ if(VMTK_SCRIPTS_ENABLED)
   #   ADD_SUBDIRECTORY(distribution)
   # endif(VMTK_ENABLE_DISTRIBUTION)
 
-  #install(EXPORT VMTK-Targets DESTINATION ${VMTK_BINARY_DIR})
-
   get_property(_wrap_hierarchy_targets GLOBAL PROPERTY VMTK_WRAP_HIERARCHY_TARGETS)
   if(_wrap_hierarchy_targets)
     foreach(target ${_wrap_hierarchy_targets})
@@ -299,17 +301,59 @@ if(VMTK_SCRIPTS_ENABLED)
   )
     endforeach()
   endif()
-
-  configure_file(
-    ${VMTK_SOURCE_DIR}/CMake/VMTKConfig.cmake.in
-    ${VMTK_BINARY_DIR}/VMTKConfig.cmake
-  @ONLY IMMEDIATE
-  )
-
-  configure_file(
-    ${VMTK_SOURCE_DIR}/CMake/VMTKUse.cmake.in
-    ${VMTK_BINARY_DIR}/VMTKUse.cmake
-  @ONLY IMMEDIATE
-  )
-
 endif(VMTK_SCRIPTS_ENABLED)
+
+#
+# Create files necessary to support `find_package(VMTK)` in downstream projects
+#
+# https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#id16
+#
+
+set(VMTK_INSTALL_CMAKE_DIR ${VMTK_INSTALL_LIB_DIR}/cmake/VMTK)
+set(vmtk_export_namespace VMTK::)
+set(version_compatibility SameMinorVersion)
+# TODO: Bump the minimum required camke version and drop this
+if (CMAKE_VERSION VERSION_LESS 3.11)
+  set(version_compatibility SameMajorVersion)
+endif()
+
+# VMTKConfigVersion.cmake for the build directory
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/VMTKConfigVersion.cmake"
+  VERSION ${VMTK_VERSION}
+  COMPATIBILITY ${version_compatibility}
+)
+
+export(EXPORT VMTK-Targets NAMESPACE ${vmtk_export_namespace})
+
+# VMTKConfig.cmake for the build tree
+configure_file(
+  ${VMTK_SOURCE_DIR}/CMake/VMTKConfig.cmake.in
+  ${VMTK_BINARY_DIR}/VMTKConfig.cmake
+  @ONLY
+)
+
+# DEPRECATED: Keeping VMTKUse.cmake only for backward compatibility with old-school downstream projects
+configure_file(
+  ${VMTK_SOURCE_DIR}/CMake/VMTKUse.cmake.in
+  ${VMTK_BINARY_DIR}/VMTKUse.cmake
+  @ONLY
+)
+
+# VMTKConfig.cmake for the install tree
+install(EXPORT VMTK-Targets
+  DESTINATION ${VMTK_INSTALL_CMAKE_DIR}
+  COMPONENT Development
+  NAMESPACE ${vmtk_export_namespace}
+  )
+
+install(
+  FILES
+    ${VMTK_BINARY_DIR}/VMTKConfig.cmake
+    ${VMTK_BINARY_DIR}/VMTKConfigVersion.cmake
+  DESTINATION
+    ${VMTK_INSTALL_CMAKE_DIR}
+  COMPONENT
+    Development
+)
