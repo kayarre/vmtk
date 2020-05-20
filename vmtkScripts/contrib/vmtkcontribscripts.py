@@ -28,10 +28,10 @@ __all__ = [
     'vmtk.vmtksurfacetonumpy',
     'vmtk.vmtksurfacewriter2',
     'vmtk.vmtkthreshold',
-    'vmtk.vmtkpetergeneratesurface.py',
-    'vmtk.vmtkpeterresurface.py',
-    'vmtk.vmtkpetersurfaceclipper.py',
-    'vmtk.vmtkendpointsections.py',
+    'vmtk.vmtkpetergeneratesurface', # custom script for generating surface from image data
+    'vmtk.vmtkpeterresurface', # custom script for resurfacing vessel following computational stenosis
+    'vmtk.vmtkpetersurfaceclipper', # peter version of vmtksurfaceclipper which includes AutoClip functionality
+    'vmtk.vmtkendpointsections',
     ]
 
 for item in __all__:
