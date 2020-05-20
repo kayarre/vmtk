@@ -29,6 +29,7 @@ Version:   $Revision: 1.4 $
 #include "vtkPointData.h"
 #include "vtkCellData.h"
 #include "vtkCellArray.h"
+#include "vtkIdTypeArray.h"
 #include "vtkIdList.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
@@ -416,17 +417,18 @@ int vtkvmtkMergeCenterlines::RequestData(vtkInformation *vtkNotUsed(request), vt
   outputLines->InitTraversal();
   for (i=0; i<numberOfMergedCells; i++)
     {
-    vtkIdType npts, *pts;
-    npts = 0;
-    pts = NULL;
-    outputLines->GetNextCell(npts,pts);
+//    vtkIdType npts, *pts;
+//    npts = 0;
+//    pts = NULL;
+		vtkSmartPointer<vtkIdList> points = vtkSmartPointer<vtkIdList>::New();
+    outputLines->GetNextCell(points);
     vtkIdType tupleValue[2];
 #if VTK_MAJOR_VERSION >= 8  || (VTK_MAJOR_VERSION >= 7 && VTK_MINOR_VERSION >= 1)
     cellAdditionalEndPointIds->GetTypedTuple(i, tupleValue);
 #else
     cellAdditionalEndPointIds->GetTupleValue(i,tupleValue);
 #endif
-    vtkIdType extendedNpts = npts;
+    vtkIdType extendedNpts = points->GetNumberOfIds();
     if (tupleValue[0] != -1)
       {
       extendedNpts += 1;
@@ -441,9 +443,9 @@ int vtkvmtkMergeCenterlines::RequestData(vtkInformation *vtkNotUsed(request), vt
       extendedOutputLines->InsertCellPoint(tupleValue[0]);
       }
     int j;
-    for (j=0; j<npts; j++)
+    for (j=0; j<points->GetNumberOfIds(); j++)
       {
-      extendedOutputLines->InsertCellPoint(pts[j]);
+      extendedOutputLines->InsertCellPoint(points->GetId(j));
       }
     if (tupleValue[1] != -1)
       {

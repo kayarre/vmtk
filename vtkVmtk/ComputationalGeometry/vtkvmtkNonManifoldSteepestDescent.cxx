@@ -54,7 +54,9 @@ double vtkvmtkNonManifoldSteepestDescent::GetSteepestDescentInCell(vtkPolyData* 
   double scalar0, scalar1, scalar;
   double currentS;
   double directionFactor = 0.0;
-  vtkIdType npts, *pts;
+//  vtkIdType npts, *pts;
+	vtkIdType npts;
+	vtkSmartPointer<vtkIdList> pointIdList = vtkSmartPointer<vtkIdList>::New();
   vtkIdType i, j;
 
   if (!this->DescentArray)
@@ -83,25 +85,27 @@ double vtkvmtkNonManifoldSteepestDescent::GetSteepestDescentInCell(vtkPolyData* 
   steepestDescent = - VTK_VMTK_LARGE_DOUBLE * directionFactor;
   steepestDescentLength = VTK_VMTK_LARGE_DOUBLE;
 
-  input->GetCellPoints(cellId,npts,pts);
+  input->GetCellPoints(cellId,pointIdList);
+	npts = pointIdList->GetNumberOfIds();
         
-  for (i=0; i<npts; i++)
+  for (i=0; i<pointIdList->GetNumberOfIds(); i++)
     {
-    input->GetPoint(pts[i],point0);
-    input->GetPoint(pts[(i+1)%npts],point1);
-    scalar0 = this->DescentArray->GetTuple1(pts[i]);
-    scalar1 = this->DescentArray->GetTuple1(pts[(i+1)%npts]);
+    input->GetPoint(pointIdList->GetId(i),point0);
+    input->GetPoint(pointIdList->GetId((i+1)%npts),point1);
+    scalar0 = this->DescentArray->GetTuple1(pointIdList->GetId(i));
+    scalar1 = this->DescentArray->GetTuple1(pointIdList->GetId((i+1)%npts));
 
     if (edge[0]==edge[1])
       {
-      if (pts[i]==edge[0])
+      if (pointIdList->GetId(i) == edge[0])
         {
         continue;
         }
       }
     else
       {
-      if (((pts[i]==edge[0]) && (pts[(i+1)%npts]==edge[1]))||((pts[i]==edge[1]) && (pts[(i+1)%npts]==edge[0])))
+      if( ( (pointIdList->GetId(i) == edge[0]) && (pointIdList->GetId(((i+1)%npts)) == edge[1] ) )
+			|| ( (pointIdList->GetId(i) == edge[1]) && (pointIdList->GetId((i+1)%npts) == edge[0]) ) )
         {
         point[0] = point0[0];
         point[1] = point0[1];
@@ -121,8 +125,8 @@ double vtkvmtkNonManifoldSteepestDescent::GetSteepestDescentInCell(vtkPolyData* 
           {
           steepestDescent = descent;
           steepestDescentLength = descentLength;
-          steepestDescentEdge[0] = pts[i];
-          steepestDescentEdge[1] = pts[i];
+          steepestDescentEdge[0] = pointIdList->GetId(i);
+          steepestDescentEdge[1] = pointIdList->GetId(i);
           steepestDescentS = currentS;
           }
         continue;
@@ -151,13 +155,13 @@ double vtkvmtkNonManifoldSteepestDescent::GetSteepestDescentInCell(vtkPolyData* 
         steepestDescentLength = descentLength;
         if (fabs(currentS)<VTK_VMTK_DOUBLE_TOL)
           {
-          steepestDescentEdge[0] = pts[i];
-          steepestDescentEdge[1] = pts[i];
+          steepestDescentEdge[0] = pointIdList->GetId(i);
+          steepestDescentEdge[1] = pointIdList->GetId(i);
           }
         else
           {
-          steepestDescentEdge[0] = pts[i];
-          steepestDescentEdge[1] = pts[(i+1)%npts];                             
+          steepestDescentEdge[0] = pointIdList->GetId(i);
+          steepestDescentEdge[1] = pointIdList->GetId((i+1)%npts);                             
           }
         steepestDescentS = currentS;
         }

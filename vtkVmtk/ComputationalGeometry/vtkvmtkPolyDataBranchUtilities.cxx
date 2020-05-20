@@ -66,7 +66,7 @@ void vtkvmtkPolyDataBranchUtilities::GetGroupsIdList(vtkPolyData* surface, const
   
   for (i=0; i<maxGroupId+1; i++)
   {
-    int isGroup = isGroupList->GetId(i);
+    vtkIdType isGroup = isGroupList->GetId(i);
     if (isGroup == 1)
       {
       groupIds->InsertNextId(i);
@@ -80,22 +80,23 @@ void vtkvmtkPolyDataBranchUtilities::ExtractGroup(vtkPolyData* surface, const ch
 {
   groupSurface->DeepCopy(surface);
 
-  int numberOfCells = surface->GetPolys()->GetNumberOfCells();
+  vtkIdType numberOfCells = surface->GetPolys()->GetNumberOfCells();
 
   vtkDataArray* groupIdsArray = surface->GetPointData()->GetArray(groupIdsArrayName);
+	vtkSmartPointer<vtkIdList> pointIdList = vtkSmartPointer<vtkIdList>::New();
 
   surface->BuildCells();
 
   vtkCellArray* polys = groupSurface->GetPolys();
   polys->Reset();
-  vtkIdType npts, *pts;
+  vtkIdType npts = pointIdList->GetNumberOfIds();
   for (int j=0; j<numberOfCells; j++)
     {
-    surface->GetCellPoints(j,npts,pts);
+    surface->GetCellPoints(j,pointIdList);
     bool insertCell = true;
     for (int k=0; k<npts; k++)
       {
-      if (static_cast<int>(groupIdsArray->GetComponent(pts[k],0) != groupId))
+      if (static_cast<int>(groupIdsArray->GetComponent(pointIdList->GetId(k),0) != groupId))
         {
         insertCell = false;
         break;
@@ -105,7 +106,7 @@ void vtkvmtkPolyDataBranchUtilities::ExtractGroup(vtkPolyData* surface, const ch
       {
       continue;
       }
-    polys->InsertNextCell(npts,pts);
+    polys->InsertNextCell(pointIdList);
     }
   polys->Squeeze();
   

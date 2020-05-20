@@ -89,25 +89,26 @@ vtkIdType vtkvmtkPolyDataLineEmbedder::GetCellId(vtkPolyData* input, vtkIdList* 
 void vtkvmtkPolyDataLineEmbedder::GetNeighbors(vtkIdType pointId, vtkIdList* neighborPointIds)
 {
   vtkIdType i, j;
-  unsigned short ncells;
-  vtkIdType *cells, npts, *pts;
+  vtkIdType ncells;
+  vtkIdType *cells/*, npts, *pts*/;
+	vtkSmartPointer<vtkIdList> points = vtkSmartPointer<vtkIdList>::New();
 
   this->Lines->GetPointCells(pointId,ncells,cells);
 
   for (i=0; i<ncells; i++)
     {
-    this->Lines->GetCellPoints(cells[i],npts,pts);
-    for (j=0; j<npts; j++)
+    this->Lines->GetCellPoints(cells[i],points);
+    for (j=0; j<points->GetNumberOfIds(); j++)
       {
-      if (pts[j]==pointId)
+      if (points->GetId(j)==pointId)
         {
         if (j>0)
           {
-          neighborPointIds->InsertUniqueId(pts[j-1]);
+          neighborPointIds->InsertUniqueId(points->GetId(j-1));
           }
-        if (j<npts-1)
+			if (j<points->GetNumberOfIds()-1)
           {
-          neighborPointIds->InsertUniqueId(pts[j+1]);
+          neighborPointIds->InsertUniqueId(points->GetId(j+1));
           }
         }
       }
@@ -274,7 +275,8 @@ int vtkvmtkPolyDataLineEmbedder::RequestData(
   vtkIdType i, j, k;
   vtkIdType id, lineNumberOfPoints, lineNumberOfCells, cellId;
   vtkIdType inputNumberOfPoints;
-  vtkIdType npts, *pts;
+//  vtkIdType npts, *pts;
+	vtkSmartPointer<vtkIdList> points = vtkSmartPointer<vtkIdList>::New();
   vtkIdType edgePointIds0[2], edgePointIds1[2];
   double pCoord;
   vtkPoints* newPoints;
@@ -549,9 +551,9 @@ int vtkvmtkPolyDataLineEmbedder::RequestData(
 
     }
 
-  for (addedTriangles->InitTraversal(); addedTriangles->GetNextCell(npts,pts); )
+  for (addedTriangles->InitTraversal(); addedTriangles->GetNextCell(points); )
     {
-    newTriangles->InsertNextCell(npts,pts);
+    newTriangles->InsertNextCell(points);
     }
 
   for (i=0; i<input->GetNumberOfCells(); i++)

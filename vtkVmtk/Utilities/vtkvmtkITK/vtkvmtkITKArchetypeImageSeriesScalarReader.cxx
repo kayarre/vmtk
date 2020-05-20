@@ -17,11 +17,11 @@
 // VTK includes
 #include <vtkCommand.h>
 #include <vtkDataArray.h>
-#if VTK_MAJOR_VERSION >= 8  || (VTK_MAJOR_VERSION >= 7 && VTK_MINOR_VERSION >= 1)
+//#if VTK_MAJOR_VERSION >= 8  || (VTK_MAJOR_VERSION >= 7 && VTK_MINOR_VERSION >= 1)
 #include <vtkAOSDataArrayTemplate.h>
-#else
-#include <vtkDataArrayTemplate.h>
-#endif
+//#else
+//#include <vtkDataArrayTemplate.h>
+//#endif
 #include <vtkImageData.h>
 #include <vtkInformation.h>
 #include <vtkInformationVector.h>
