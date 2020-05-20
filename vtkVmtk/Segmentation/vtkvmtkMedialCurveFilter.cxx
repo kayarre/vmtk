@@ -76,6 +76,7 @@ void vtkvmtkMedialCurveFilter::SimpleExecute(vtkImageData* input, vtkImageData* 
 	// convolution kernels in each direction and use them recursively.
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	typedef itk::RecursiveGaussianImageFilter<ImageType, ImageType> RecursiveGaussianFilterType;
+	using GaussianOrderEnum = itk::RecursiveGaussianImageFilterEnums::GaussianOrder;
 	RecursiveGaussianFilterType::Pointer gaussianFilterX = RecursiveGaussianFilterType::New();
 	RecursiveGaussianFilterType::Pointer gaussianFilterY = RecursiveGaussianFilterType::New();
 	RecursiveGaussianFilterType::Pointer gaussianFilterZ = RecursiveGaussianFilterType::New();
@@ -84,9 +85,9 @@ void vtkvmtkMedialCurveFilter::SimpleExecute(vtkImageData* input, vtkImageData* 
 	gaussianFilterY->SetDirection(1);
 	gaussianFilterZ->SetDirection(2);
 
-	gaussianFilterX->SetOrder(RecursiveGaussianFilterType::ZeroOrder);
-	gaussianFilterY->SetOrder(RecursiveGaussianFilterType::ZeroOrder);
-	gaussianFilterZ->SetOrder(RecursiveGaussianFilterType::ZeroOrder);
+	gaussianFilterX->SetOrder(GaussianOrderEnum::ZeroOrder);
+	gaussianFilterY->SetOrder(GaussianOrderEnum::ZeroOrder);
+	gaussianFilterZ->SetOrder(GaussianOrderEnum::ZeroOrder);
 
 	gaussianFilterX->SetNormalizeAcrossScale(false);
 	gaussianFilterY->SetNormalizeAcrossScale(false);

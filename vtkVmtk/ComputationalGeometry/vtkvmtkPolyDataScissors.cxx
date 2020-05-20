@@ -72,8 +72,8 @@ int vtkvmtkPolyDataScissors::IsEdgeInCell(vtkPolyData *input, vtkIdType edgePoin
 int vtkvmtkPolyDataScissors::GetCellsOnSameSide(vtkPolyData* input, vtkIdType targetCellId0, vtkIdType targetCellId1, vtkIdType referenceCellId, vtkIdType linePointId0, vtkIdType linePointId1, vtkIdType linePointId2, vtkIdList *cellsOnSameSide)
 {
 	vtkIdType i, j;
-	vtkIdType ncells;
-	vtkIdType *cells;
+	vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
+	//vtkIdType *cells;
 	vtkIdType previousCellId;
 //	vtkIdType npts, *pts;
 	vtkIdType edge[2];
@@ -84,7 +84,7 @@ int vtkvmtkPolyDataScissors::GetCellsOnSameSide(vtkPolyData* input, vtkIdType ta
 		cellsOnSameSide->Initialize();
 	}
 	
-	input->GetPointCells(linePointId1,ncells,cells);
+	input->GetPointCells(linePointId1, cellIds);
 	
 	edge[0] = linePointId1;
 	
@@ -117,23 +117,23 @@ int vtkvmtkPolyDataScissors::GetCellsOnSameSide(vtkPolyData* input, vtkIdType ta
 	while( !done )
 	{
 		done = true;
-		for (i=0; i<ncells; i++)
+		for (i=0; i < cellIds->GetNumberOfIds(); ++i)
 		{
-			if (cells[i]==previousCellId)
+			if (cellIds->GetId(i) == previousCellId)
 				continue;
 			
-			if (this->IsEdgeInCell(input,edge[0],edge[1],cells[i]))
+			if (this->IsEdgeInCell(input,edge[0],edge[1],cellIds->GetId(i)))
 			{
-				if ((cells[i]==targetCellId0)||(cells[i]==targetCellId1))
+				if ((cellIds->GetId(i)==targetCellId0) || (cellIds->GetId(i)==targetCellId1))
 				{
-					cellsOnSameSide->InsertNextId(cells[i]);
+					cellsOnSameSide->InsertNextId(cellIds->GetId(i));
 					return 1;
 				}
 				
 				done = false;
 				
-				cellsOnSameSide->InsertNextId(cells[i]);
-				previousCellId = cells[i];
+				cellsOnSameSide->InsertNextId(cellIds->GetId(i));
+				previousCellId = cellIds->GetId(i);
 				
 				input->GetCellPoints( referenceCellId, pointIdList );
 				npts = pointIdList->GetNumberOfIds();

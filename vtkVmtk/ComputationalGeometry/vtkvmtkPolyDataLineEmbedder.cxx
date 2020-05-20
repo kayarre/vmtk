@@ -89,15 +89,16 @@ vtkIdType vtkvmtkPolyDataLineEmbedder::GetCellId(vtkPolyData* input, vtkIdList* 
 void vtkvmtkPolyDataLineEmbedder::GetNeighbors(vtkIdType pointId, vtkIdList* neighborPointIds)
 {
   vtkIdType i, j;
-  vtkIdType ncells;
-  vtkIdType *cells/*, npts, *pts*/;
+  //vtkIdType ncells;
+  //vtkIdType *cells/*, npts, *pts*/;
 	vtkSmartPointer<vtkIdList> points = vtkSmartPointer<vtkIdList>::New();
+  vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
 
-  this->Lines->GetPointCells(pointId,ncells,cells);
+  this->Lines->GetPointCells(pointId, cellIds);
 
-  for (i=0; i<ncells; i++)
+  for (i=0; i < cellIds->GetNumberOfIds(); ++i)
     {
-    this->Lines->GetCellPoints(cells[i],points);
+    this->Lines->GetCellPoints(cellIds->GetId(i), points);
     for (j=0; j<points->GetNumberOfIds(); j++)
       {
       if (points->GetId(j)==pointId)

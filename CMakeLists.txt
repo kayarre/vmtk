@@ -20,7 +20,7 @@ if(VMTK_WITH_LIBRARY_VERSION)
      )
 endif(VMTK_WITH_LIBRARY_VERSION)
 
-find_package( PythonInterp )
+find_package(Python3 COMPONENTS Interpreter Development)
 if (NOT VMTK_PYTHON_VERSION)
   set(VMTK_PYTHON_VERSION "python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" CACHE STRING "" FORCE)
 endif (NOT VMTK_PYTHON_VERSION)
@@ -149,6 +149,12 @@ if( VMTK_USE_SUPERBUILD )
     set ( VMTK_WITH_LIBRARY_VERSION OFF )
     set ( VTK_REQUIRED_OBJCXX_FLAGS "-fobjc-gc" CACHE STRING "" FORCE)
   else (VMTK_BUNJEE_BUILD)
+    set(VTK_SMP_IMPLEMENTATION_TYPE "Sequential"
+    CACHE STRING "Which multi-threaded parallelism implementation to use. Options are Sequential, OpenMP or TBB")
+    set_property(CACHE VTK_SMP_IMPLEMENTATION_TYPE
+      PROPERTY
+        STRINGS Sequential OpenMP TBB)
+
     option ( VTK_VMTK_WRAP_PYTHON "Generate Python wrappings for C++ classes." ON )
     if (UNIX)
       set ( VTK_USE_X ON )

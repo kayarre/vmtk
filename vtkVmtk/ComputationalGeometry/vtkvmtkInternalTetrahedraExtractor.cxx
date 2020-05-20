@@ -265,14 +265,15 @@ int vtkvmtkInternalTetrahedraExtractor::RequestData(
 
       for (j=0; j<tetra->GetNumberOfPoints(); j++)
         {
-        vtkIdType ncells;
-        vtkIdType* cells;
-        this->Surface->GetPointCells(j,ncells,cells);
+        //vtkIdType ncells;
+        vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
+        //vtkIdType* cells;
+        this->Surface->GetPointCells(j, cellIds);
         double minEdgeLength = VTK_VMTK_LARGE_DOUBLE;
         int k;
-        for (k=0; k<ncells; k++)
+        for (k=0; k < cellIds->GetNumberOfIds(); ++k)
           {
-          vtkTriangle* triangle = vtkTriangle::SafeDownCast(this->Surface->GetCell(cells[k]));
+          vtkTriangle* triangle = vtkTriangle::SafeDownCast(this->Surface->GetCell(cellIds->GetId(k)));
           if (!triangle)
             {
             continue;

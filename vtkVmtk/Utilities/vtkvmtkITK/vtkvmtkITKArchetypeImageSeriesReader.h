@@ -25,6 +25,7 @@ class vtkMatrix4x4;
 // ITK includes
 #include "itkMetaDataDictionary.h"
 #include "itkSpatialOrientation.h"
+#include "itkCommonEnums.h"
 
 // STD includes
 #include <algorithm>

@@ -84,3 +84,48 @@ set(TETGEN_SOURCE_DIR "${VTK_VMTK_SOURCE_DIR}/Utilities/tetgen1.4.3")
 foreach(dir ${dirs})
   add_subdirectory(${dir})
 endforeach()
+
+
+if(NOT VTK_VERSION VERSION_LESS 8.90)
+    # When building as a stand-alone module for VTK 9
+    message(STATUS "vtkvmtkCommontest: Building as an External VTK Module")
+
+    # Clear VTK_LIBS, linking will be handled by modular build
+    set(VTK_LIBS)
+    set(VTK_Commontest_LINK_TARGET VMTK::Commontest)
+
+    vtk_module_scan(
+      MODULE_FILES        "${CMAKE_CURRENT_SOURCE_DIR}/Commontest/Common.module"
+      REQUEST_MODULES     "VMTK::Commontest"
+      PROVIDES_MODULES    vmtk_modules
+      ENABLE_TESTS        "${BUILD_TESTING}")
+
+    vtk_module_build(
+      MODULES             ${vmtk_modules}
+      INSTALL_EXPORT      Commontest
+      ARCHIVE_DESTINATION "lib"
+      HEADERS_DESTINATION "include/Commontest${DICOM_SHORT_VERSION}"
+      CMAKE_DESTINATION   "${CMAKE_INSTALL_LIBDIR}/cmake/vtk"
+      LICENSE_DESTINATION "${CMAKE_INSTALL_LIBDIR}/vtk"
+      HIERARCHY_DESTINATION "${CMAKE_INSTALL_LIBDIR}/vtk/hierarchy/${CMAKE_PROJECT_NAME}"
+      LIBRARY_NAME_SUFFIX "${Commontest_CUSTOM_LIBRARY_SUFFIX}"
+      VERSION             "${Commontest_VERSION}"
+      SOVERSION           "1"
+      TEST_DATA_TARGET    CommontestData
+      USE_EXTERNAL        "${Commontest_USE_EXTERNAL}"
+      TEST_INPUT_DATA_DIRECTORY   "${Commontest_test_data_directory_input}"
+      TEST_OUTPUT_DATA_DIRECTORY  "${Commontest_test_data_directory_output}")
+
+    if(BUILD_PYTHON_WRAPPERS)
+      find_package(PythonInterp ${VTK_PYTHON_VERSION} QUIET)
+
+      vtk_module_wrap_python(
+        MODULES         ${vmtk_modules}
+        INSTALL_EXPORT  CommonPython
+        PYTHON_PACKAGE  "vmtk.modules"
+        #MODULE_DESTINATION  ""
+        CMAKE_DESTINATION   "${CMAKE_INSTALL_LIBDIR}/cmake/vtk"
+        LIBRARY_DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        BUILD_STATIC    OFF)
+    endif()
+  endif() #(NOT VTK_VERSION VERSION_LESS 8.90)

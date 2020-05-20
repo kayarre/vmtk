@@ -106,9 +106,10 @@ void vtkvmtkNonManifoldFastMarching::InitPropagation(vtkPolyData* input)
 {
   vtkIdType i, j, k, l;
   vtkIdType pointId;
-  vtkIdType /*npts, *pts,*/ *cells;
+  //vtkIdType /*npts, *pts,*/ *cells;
 	vtkSmartPointer<vtkIdList> points = vtkSmartPointer<vtkIdList>::New();
-  vtkIdType ncells;
+  //vtkIdType ncells;
+  vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
   vtkIdType intersectedEdge[2];
   vtkDataArray* initializationArray, *costFunctionArray, *intersectedEdgesArray;
   vtkIdList* neighborCells;
@@ -202,10 +203,10 @@ void vtkvmtkNonManifoldFastMarching::InitPropagation(vtkPolyData* input)
           {
           boundaryPointIds->InsertUniqueId(points->GetId(k));
           minDistance = this->TScalars->GetComponent(points->GetId(k),0);
-          this->BoundaryPolyData->GetPointCells(i,ncells,cells);
-          for (l=0; l<ncells; l++)
+          this->BoundaryPolyData->GetPointCells(i, cellIds);
+          for (l=0; l < cellIds->GetNumberOfIds(); ++l)
             {
-            polyLine = vtkPolyLine::SafeDownCast(this->BoundaryPolyData->GetCell(cells[l]));
+            polyLine = vtkPolyLine::SafeDownCast(this->BoundaryPolyData->GetCell(cellIds->GetId(l)));
             if (!polyLine)
               {
               vtkWarningMacro(<<"BoundaryPolyData is not all made up of PolyLines");
@@ -255,14 +256,15 @@ void vtkvmtkNonManifoldFastMarching::InitPropagation(vtkPolyData* input)
 void vtkvmtkNonManifoldFastMarching::GetNeighbors(vtkPolyData* input, vtkIdType pointId, vtkIdList* neighborIds)
 {
   vtkIdType i, j;
-  vtkIdType /*npts, *pts,*/ *cells;
-  vtkIdType ncells;
+  //vtkIdType /*npts, *pts,*/ *cells;
+  //vtkIdType ncells;
   vtkSmartPointer<vtkIdList> points = vtkSmartPointer<vtkIdList>::New();
+  vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
 
-  input->GetPointCells(pointId,ncells,cells);
-  for (i=0; i<ncells; i++)
+  input->GetPointCells(pointId, cellIds);
+  for (i=0; i<cellIds->GetNumberOfIds(); i++)
     {
-    input->GetCellPoints(cells[i],points);
+    input->GetCellPoints(cellIds->GetId(i),points);
     for (j=0; j<points->GetNumberOfIds(); j++)
       {
       if (points->GetId(j)!=pointId)
@@ -549,7 +551,7 @@ void vtkvmtkNonManifoldFastMarching::UpdateNeighbor(vtkPolyData* input, vtkIdTyp
 
   neighborCellNeighborIds = vtkIdList::New();
 
-  input->GetPointCells(neighborId,neighborCellNeighborIds);
+  input->GetPointCells(neighborId, neighborCellNeighborIds);
 
   tMin = this->TScalars->GetValue(neighborId);
   trianglePts[0] = neighborId;

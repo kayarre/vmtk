@@ -561,18 +561,19 @@ void vtkvmtkPolyDataBranchSections::ExtractCylinderSection(vtkPolyData* cylinder
 
   int numberOfLinePoints = section->GetNumberOfPoints();
 
-  vtkIdType ncells;
-  vtkIdType* cells;
-//  vtkIdType npts, *pts;
+  //vtkIdType ncells;
+  //tkIdType* cells;
+  //  vtkIdType npts, *pts;
 	vtkSmartPointer<vtkIdList> points = vtkSmartPointer<vtkIdList>::New();
+  vtkSmartPointer<vtkIdList> cellIds = vtkSmartPointer<vtkIdList>::New();
 
   int numberOfSingleCellPoints = 0;
   vtkIdType firstPointId = -1;
 
   for (int i=0; i<numberOfLinePoints; i++)
     {
-    section->GetPointCells(i,ncells,cells);
-    if (ncells == 1)
+    section->GetPointCells(i, cellIds);
+    if (cellIds->GetNumberOfIds() == 1)
       {
       ++numberOfSingleCellPoints;
       firstPointId = i;
@@ -595,12 +596,12 @@ void vtkvmtkPolyDataBranchSections::ExtractCylinderSection(vtkPolyData* cylinder
   vtkIdType cellId = -1;
   while (!done)
     {
-    section->GetPointCells(pointId,ncells,cells);
-    if (ncells == 1)
+    section->GetPointCells(pointId, cellIds);
+    if (cellIds->GetNumberOfIds() == 1)
       {
       if (pointId == firstPointId)
         {
-        cellId = cells[0];
+        cellId = cellIds->GetId(0);
         }
       else
         {
@@ -608,15 +609,15 @@ void vtkvmtkPolyDataBranchSections::ExtractCylinderSection(vtkPolyData* cylinder
         break;
         }
       }
-    else if (ncells == 2)
+    else if (cellIds->GetNumberOfIds() == 2)
       {
-      if (cells[0] == cellId)
+      if (cellIds->GetId(0) == cellId)
         {
-        cellId = cells[1];
+        cellId = cellIds->GetId(1);
         }
       else
         {
-        cellId = cells[0];
+        cellId = cellIds->GetId(0);
         }
       }
 
