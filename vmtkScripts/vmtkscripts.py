@@ -152,10 +152,10 @@ __all__ = [
     'vmtk.vmtksurfmesh',
     'vmtk.vmtktetgen',
     'vmtk.vmtktetringenerator',
-    'vmtk.peterresurface', # custom script for resurfacing vessel following computational stenosis
-    'vmtk.petergeneratesurface', # custom script for generating surface from image data
-    'vmtk.testclippertransform', # custom script to test functionality of of Transforms in clipper
-    'vmtk.petersurfaceclipper' # peter version of vmtksurfaceclipper which includes AutoClip functionality
+    'vmtk.vmtkpeterresurface', # custom script for resurfacing vessel following computational stenosis
+    'vmtk.vmtkpetergeneratesurface', # custom script for generating surface from image data
+    #'vmtk.vmtktestclippertransform', # custom script to test functionality of of Transforms in clipper
+    'vmtk.vmtkpetersurfaceclipper', # peter version of vmtksurfaceclipper which includes AutoClip functionality
     ]
 
 for item in __all__:
