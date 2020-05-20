@@ -1,6 +1,6 @@
 project(VTK_VMTK)
 
-# include(${VMTK_SOURCE_DIR}/CMake/vmtkFunctions.cmake)
+include(${VMTK_SOURCE_DIR}/CMake/vmtkFunctions.cmake)
 
 set(dirs
   Utilities

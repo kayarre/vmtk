@@ -21,7 +21,7 @@
 #include "itkHessianSmoothed3DToVesselnessMeasureImageFilter.h"
 #include "itkMultiScaleHessianBasedMeasureImageFilter.h"
 #include "itkAnisotropicDiffusionVesselEnhancementFunction.h"
-#include "itkMultiThreader.h"
+#include "itkMultiThreaderBase.h"
 #include "itkSymmetricSecondRankTensor.h"
 #include "itkSymmetricEigenVectorAnalysisImageFilter.h"
 
