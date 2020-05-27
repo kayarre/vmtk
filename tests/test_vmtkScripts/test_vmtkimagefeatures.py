@@ -24,6 +24,7 @@ import vmtk.vmtkimagefeatures as imagefeatures
     ("gradient", '1'),
     ("upwind", '2'),
 ])
+@pytest.mark.xfail(run=False)
 def test_features_types(aorta_image, compare_images, featureType, paramid, write_image):
     name = __name__ + '_test_features_types_' + paramid + '.mha'
     featurer = imagefeatures.vmtkImageFeatures()
@@ -38,6 +39,7 @@ def test_features_types(aorta_image, compare_images, featureType, paramid, write
     ("gradient", '0'),
     ("upwind", '1'),
 ])
+@pytest.mark.xfail(run=False)
 def test_sigmoid_on_for_gradient_and_upwind(aorta_image, compare_images, featureType, paramid, write_image):
     name = __name__ + '_test_sigmoid_on_for_gradient_and_upwind_' + paramid + '.mha'
     featurer = imagefeatures.vmtkImageFeatures()
@@ -54,6 +56,7 @@ def test_sigmoid_on_for_gradient_and_upwind(aorta_image, compare_images, feature
     (0.5, '1'),
     (4.8, '2'),
 ])
+@pytest.mark.xfail(run=False)
 def test_derivative_sigma_values_for_gradient(aorta_image, compare_images, derivativeValue, paramid, write_image):
     name = __name__ + '_test_derivative_sigma_values_for_gradient_' + paramid + '.mha'
     featurer = imagefeatures.vmtkImageFeatures()
@@ -69,6 +72,7 @@ def test_derivative_sigma_values_for_gradient(aorta_image, compare_images, deriv
     (0.0, '0'),
     (0.3, '1'),
 ])
+@pytest.mark.xfail(run=False)
 def test_upwind_factor_values_for_upwind(aorta_image, compare_images, upwindValue, paramid, write_image):
     name = __name__ + '_test_upwind_factor_values_for_upwind_' + paramid + '.mha'
     featurer = imagefeatures.vmtkImageFeatures()
