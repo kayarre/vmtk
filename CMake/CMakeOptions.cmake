@@ -72,7 +72,7 @@ if (VTK_WRAP_PYTHON)
 
   if (VTK_VMTK_WRAP_PYTHON)
     set(VTK_WRAP_PYTHON3_INIT_DIR "${VTK_VMTK_SOURCE_DIR}/Wrapping")
-    include(${VTK_CMAKE_DIR}/vtkWrapPython.cmake)
+    #include(${VTK_CMAKE_DIR}/vtkWrapPython.cmake)
     if (WIN32)
       if (NOT BUILD_SHARED_LIBS)
         message(FATAL_ERROR "Python support requires BUILD_SHARED_LIBS to be ON.")

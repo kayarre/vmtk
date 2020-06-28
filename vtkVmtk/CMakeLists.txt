@@ -1,6 +1,6 @@
 project(VTK_VMTK)
 
-include(${VMTK_SOURCE_DIR}/CMake/vmtkFunctions.cmake)
+# include(${VMTK_SOURCE_DIR}/CMake/vmtkFunctions.cmake)
 
 set(dirs
   Utilities
@@ -24,11 +24,6 @@ endif (VTK_VMTK_CONTRIB)
 
 include (${VMTK_SOURCE_DIR}/CMake/CMakeOptions.cmake)
 
-configure_file(
-  ${VTK_VMTK_SOURCE_DIR}/vtkvmtkConfigure.h.in
-  ${VTK_VMTK_BINARY_DIR}/vtkvmtkConfigure.h
-  )                                                                                                  
-
 if(APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
   set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dylib_file,/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:/System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib")
@@ -42,21 +37,21 @@ if (VTK_USE_COCOA)
   option(VTK_VMTK_USE_COCOA "Build the Cocoa vmtk classes." ON)
 endif (VTK_USE_COCOA)
 
-if(NOT VTK_VMTK_INSTALL_BIN_DIR)
+if(NOT DEFINED VTK_VMTK_INSTALL_BIN_DIR)
   set(VTK_VMTK_INSTALL_BIN_DIR bin)
-endif(NOT VTK_VMTK_INSTALL_BIN_DIR)
+endif(NOT DEFINED VTK_VMTK_INSTALL_BIN_DIR)
 
-if(NOT VTK_VMTK_INSTALL_INCLUDE_DIR)
+if(NOT DEFINED VTK_VMTK_INSTALL_INCLUDE_DIR)
   set(VTK_VMTK_INSTALL_INCLUDE_DIR include/vmtk)
-endif(NOT VTK_VMTK_INSTALL_INCLUDE_DIR)
+endif(NOT DEFINED VTK_VMTK_INSTALL_INCLUDE_DIR)
 
-if(NOT VTK_VMTK_INSTALL_LIB_DIR)
+if(NOT DEFINED VTK_VMTK_INSTALL_LIB_DIR)
   set(VTK_VMTK_INSTALL_LIB_DIR lib)
-endif(NOT VTK_VMTK_INSTALL_LIB_DIR)
+endif(NOT DEFINED VTK_VMTK_INSTALL_LIB_DIR)
 
-if(NOT VTK_VMTK_MODULE_INSTALL_LIB_DIR)
-  set(VTK_VMTK_MODULE_INSTALL_LIB_DIR lib/${VMTK_PYTHON_VERSION}/site-packages/vmtk)
-endif(NOT VTK_VMTK_MODULE_INSTALL_LIB_DIR)
+if(NOT DEFINED VTK_VMTK_MODULE_INSTALL_LIB_DIR)
+  set(VTK_VMTK_MODULE_INSTALL_LIB_DIR ${VTK_VMTK_INSTALL_LIB_DIR}/${VMTK_PYTHON_VERSION}/site-packages/vmtk)
+endif(NOT DEFINED VTK_VMTK_MODULE_INSTALL_LIB_DIR)
 
 include_directories (${VTK_VMTK_SOURCE_DIR})
 include_directories (${VTK_VMTK_SOURCE_DIR}/Common)
@@ -75,11 +70,6 @@ include_directories (${VTK_VMTK_SOURCE_DIR}/Utilities/vtkvmtkITK)
 include_directories (${VTK_VMTK_BINARY_DIR})
 
 set(VTK_DOXYGEN_HOME ${VTK_VMTK_SOURCE_DIR}/Utilities/Doxygen)
-
-file(GLOB files "${VTK_VMTK_BINARY_DIR}/vtkvmtkConfigure*.h")
-install(FILES ${files}
-  DESTINATION ${VTK_VMTK_INSTALL_INCLUDE_DIR}
-  COMPONENT Development)
 
 if (VTK_WRAP_PYTHON AND VTK_VMTK_WRAP_PYTHON)
   include_directories (${VTK_PYTHON_INCLUDE_DIR})
