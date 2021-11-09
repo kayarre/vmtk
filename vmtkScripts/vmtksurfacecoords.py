@@ -55,7 +55,7 @@ class vmtkSurfaceCoords(pypes.pypeScript):
             scalarCoords.SetNumberOfComponents(1)
             scalarCoords.SetNumberOfTuples(data.GetNumberOfPoints())
             scalarCoords.SetName(names[j])
-            for i in range(self.Surface.GetNumberOfPoints()):
+            for i in range(data.GetNumberOfPoints()):
                 scalarCoords.SetValue(i,coords.GetComponent(i,j))
             data.GetPointData().AddArray(scalarCoords)
 
