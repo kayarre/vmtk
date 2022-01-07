@@ -34,20 +34,33 @@ class vmtkSeedSelector(object):
 
     def __init__(self):
         self._Surface = None
+        self._Centerlines = None
         self._SeedIds = None
         self._MainBodySeedIds = vtk.vtkIdList()
         self._TargetSeedIds = vtk.vtkIdList()
-        self._OutletSeedIds = vtk.vtkIdList()
+        #self._OutletSeedIds = vtk.vtkIdList()
         self.PrintError = None
         self.PrintLog = None
         self.InputText = None
         self.OutputText = None
         self.InputInfo = None
+        self.Opacity = 1.0
 
-    def SetSurface(self,surface):
+    def SetSurface(self, surface):
         self._Surface = surface
     def GetSurface(self):
         return self._Surface
+    
+    def SetCenterlines(self, centerlines):
+        self._Centerlines = centerlines
+    def GetCenterlines(self):
+        return self._Centerlines
+
+    def SetOpacity(self, opacity):
+        self.Opacity = opacity
+
+    def GetOpacity(self):
+        return self.Opacity
 
     def GetMainBodySeedIds(self):
         return self._MainBodySeedIds
@@ -55,8 +68,8 @@ class vmtkSeedSelector(object):
     def GetTargetSeedIds(self):
         return self._TargetSeedIds
 
-    def GetOutletSeedIds(self):
-        return self._OutletSeedIds
+    #def GetOutletSeedIds(self):
+        #return self._OutletSeedIds
 
     def Execute(self):
         pass
@@ -70,7 +83,6 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
         self.vmtkRenderer = None
         self.OwnRenderer = 0
         self.Script = None
-        self.Opacity = 1
         self.continue_ = 0
 
     def UndoCallback(self, obj):
@@ -116,10 +128,13 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
         if (self._Surface == None):
             self.PrintError('vmtkPickPointSeedSelector Error: Surface not set.')
             return
+        if (self._Centerlines == None):
+            self.PrintError('vmtkPickPointSeedSelector Error: Centerlines not set.')
+            return
 
         self._MainBodySeedIds.Initialize()
         self._TargetSeedIds.Initialize()
-        self._OutletSeedIds.Initialize()
+        #self._OutletSeedIds.Initialize()
 
         if not self.vmtkRenderer:
             self.vmtkRenderer = vmtkrenderer.vmtkRenderer()
@@ -152,9 +167,21 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
         surfaceMapper.ScalarVisibilityOff()
         surfaceActor = vtk.vtkActor()
         surfaceActor.SetMapper(surfaceMapper)
-        surfaceActor.GetProperty().SetOpacity(1.0)
+        surfaceActor.GetProperty().SetOpacity(self.GetOpacity())
 
         self.vmtkRenderer.Renderer.AddActor(surfaceActor)
+        
+        centerlineMapper = vtk.vtkPolyDataMapper()
+        centerlineMapper.SetInputData(self._Centerlines)
+        centerlineMapper.ScalarVisibilityOff()
+        #centerlineActor.GetProperty().SetOpacity(1.0)
+        centerlineActor = vtk.vtkActor()
+        centerlineActor.SetMapper(centerlineMapper)
+        #centerlineActor.GetProperty().SetOpacity(1.0)
+        #centerlineActor.GetProperty().RenderLinesAsTubesOn()
+        #centerlineActor.GetProperty().SetColor(28.0, 164.0, 33.0)
+
+        self.vmtkRenderer.Renderer.AddActor(centerlineActor)
 
         self.InputInfo('Please position the mouse and press space to add a point on the main body of the model, \'u\' to undo\n')
 
@@ -165,7 +192,7 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
             any = self.PickedSeedIds.GetNumberOfIds()
         self._MainBodySeedIds.DeepCopy(self.PickedSeedIds)
 
-        self.InputInfo('Please position the mouse and press space to add point on vessel wall near each Inlet location, \'u\' to undo\n')
+        self.InputInfo('Please position the mouse and press space to add point on vessel wall near each Inlet/Outlet location, \'u\' to undo\n')
 
         any = 0
         continue_ = 0
@@ -176,16 +203,16 @@ class vmtkPickPointSeedSelector(vmtkSeedSelector):
             continue_ = self.continue_
         self._TargetSeedIds.DeepCopy(self.PickedSeedIds)
 
-        self.InputInfo('Please position the mouse and press space to add point on vessel wall near each Outlet location, \'u\' to undo\n')
+        #self.InputInfo('Please position the mouse and press space to add point on vessel wall near each Outlet location, \'u\' to undo\n')
 
-        any = 0
-        continue_ = 0
-        while (any == 0) and (continue_ == 0):
-            self.InitializeSeeds()
-            self.vmtkRenderer.Render()
-            any = self.PickedSeedIds.GetNumberOfIds()
-            continue_ = self.continue_
-        self._OutletSeedIds.DeepCopy(self.PickedSeedIds)
+        #any = 0
+        #continue_ = 0
+        #while (any == 0) and (continue_ == 0):
+            #self.InitializeSeeds()
+            #self.vmtkRenderer.Render()
+            #any = self.PickedSeedIds.GetNumberOfIds()
+            #continue_ = self.continue_
+        #self._OutletSeedIds.DeepCopy(self.PickedSeedIds)
 
         if self.OwnRenderer:
             self.vmtkRenderer.Deallocate()
@@ -300,6 +327,7 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
 
         self.CleanOutput = 1
         self.remesh = 1
+        self.Opacity = 0.7
 
 
         self.SetScriptName('vmtksurfaceclippercenterline2')
@@ -311,12 +339,13 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
             ['FrenetTangentArrayName','frenettangentarray','str',1,'','name of the array where centerline tangent vectors of the Frenet reference system are stored'],
             ['FrenetNormalArrayName','frenetnormalarray','str',1,'','name of the array where centerline normal vectors of the Frenet reference system are stored'],
             ['Interactive','interactive','bool',1],
-            ['MainBodyPointId', 'mainbodypointid', 'int',1,'(0.0,)'],
-            ['vmtkRenderer','renderer','vmtkRenderer',1,'','external renderer']
+            ['MainBodyPointId', 'mainbodypointid', 'int',1,'(0,)'],
+            ['vmtkRenderer','renderer','vmtkRenderer',1,'','external renderer'],
+            ['Opacity','opacity','float',0.05,'(0.0,1.0)','object opacity in the scene']
             ])
         self.SetOutputMembers([
             ['Surface','o','vtkPolyData',1,'','the output surface','vmtksurfacewriter'],
-             ['BoundaryDirection','boundary','vtkPolyData',1,'','the vertex inlet/outlet point information','vmtksurfacewriter']
+            ['BoundaryDirection','boundary','vtkPolyData',1,'','the vertex inlet/outlet point information','vmtksurfacewriter']
             ])
 
     def Execute(self):
@@ -338,7 +367,9 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
             self.SeedSelector.vmtkRenderer = self.vmtkRenderer
             self.SeedSelector.Script = self
 
+            self.SeedSelector.SetCenterlines(self.Centerlines)
             self.SeedSelector.SetSurface(self.Surface)
+            self.SeedSelector.SetOpacity(self.Opacity)
             self.SeedSelector.InputInfo = self.InputInfo
             self.SeedSelector.InputText = self.InputText
             self.SeedSelector.OutputText = self.OutputText
@@ -350,7 +381,8 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
             mainBodySeedId = mainBodySeedIds.GetId(0)
 
             targetSeedIds = self.SeedSelector.GetTargetSeedIds()
-            outletSeedIds = self.SeedSelector.GetOutletSeedIds()
+            outletSeedIds = vtk.vtkIdList()
+            #outletSeedIds = self.SeedSelector.GetOutletSeedIds()
         
         else:
             if self.BoundaryReference == None:
@@ -420,6 +452,11 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
         locator_ctr = vtk.vtkPointLocator()
         locator_ctr.SetDataSet(self.Centerlines)
         locator_ctr.BuildLocator()
+        
+        # Create the tree
+        ctr_cell_locator = vtk.vtkCellLocator()
+        ctr_cell_locator.SetDataSet(self.Centerlines)
+        ctr_cell_locator.BuildLocator()
 
         seeds_dict = { "inlets": targetSeedIds, "outlets" : outletSeedIds}
 
@@ -436,14 +473,18 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
         #print(targetSeedIds.GetNumberOfIds(), outletSeedIds.GetNumberOfIds())
         seed_count = 0
         print(targetSeedIds.GetNumberOfIds(), outletSeedIds.GetNumberOfIds())
+        ctr_main_body_pt_id = copy.deepcopy(locator_ctr.FindClosestPoint(mainBodyPoint))
+        dijkstra = vtk.vtkDijkstraGraphGeodesicPath()
+        dijkstra.SetInputData(self.Centerlines)
+        dijkstra.SetEndVertex(ctr_main_body_pt_id) # end at main body point
 
-        for seed_type in seeds_dict.keys():
+        for seed_type, vtkIDlist  in seeds_dict.items():
             #print(seeds_dict[seed_type].GetNumberOfIds())
-            if (seeds_dict[seed_type].GetNumberOfIds() < 1):
+            if (vtkIDlist.GetNumberOfIds() < 1):
                 continue
 
-            for i in range(seeds_dict[seed_type].GetNumberOfIds()):
-                seedId = seeds_dict[seed_type].GetId(i)
+            for i in range(vtkIDlist.GetNumberOfIds()):
+                seedId = vtkIDlist.GetId(i)
                 #print(seedId)
 
                 #locator = vtk.vtkPointLocator()
@@ -453,27 +494,106 @@ class vmtkSurfaceClipperCenterline2(pypes.pypeScript):
                 seedPoint = self.Surface.GetPoint(seedId)
                 #seedPointId = locator.FindClosestPoint(seedPoint)
                 #surf_point = clippedSurface.GetPoint(seedPointId)
-
+                
                 centerlinePointId = copy.deepcopy(locator_ctr.FindClosestPoint(seedPoint))
                 centerlinetangent = copy.deepcopy( self.Centerlines.GetPointData().GetArray(self.FrenetTangentArrayName).GetTuple(centerlinePointId))
 
                 centerlinenormal = copy.deepcopy( self.Centerlines.GetPointData().GetArray(self.FrenetNormalArrayName).GetTuple(centerlinePointId))
                 centerlinePoint = copy.deepcopy(self.Centerlines.GetPoint(centerlinePointId))
+                
+                test = True
+                if (self.Interactive and test == False):
+                    # get cell associated with point
+                    cell_Ids = vtk.vtkIdList()
+                    self.Centerlines.GetPointCells(centerlinePointId, cell_Ids)
+                    n_pt_neighbors = cell_Ids.GetNumberOfIds()
+                    if(n_pt_neighbors  > 1):
+                        print("at a bifurcation, that is bad")
+                    
+                    #assume there is one cell
+                    bif_pt_id = None
+                    ctr_cell = self.Centerlines.GetCell(cell_Ids.GetId(0))
+                    for j in range(ctr_cell.GetNumberOfPoints()):
+                        global_pt_id = ctr_cell.GetPointIds().GetId(j)
+                        if (global_pt_id == centerlinePointId):
+                            bif_pt_id = j
+                            break
+                            print(" found cell point id")
 
+                    term_bif = False
+                    cell_Ids_test = vtk.vtkIdList()
+                    for i in range(bif_pt_id, ctr_cell.GetNumberOfPoints()):
+                        self.Centerlines.GetPointCells(ctr_cell.GetPointIds().GetId(i), cell_Ids_test)
+                        term_cell_pt_id = i
+                        if(cell_Ids_test.GetNumberOfIds() > 1):
+                            term_bif = True
+                            break
+                    
+                        
+                    # get the next point after the  centerlinePoint
+                    pt_2 = self.Centerlines.GetPoint(ctr_cell.GetPointIds().GetId(bif_pt_id+1))
+                    
+                    new_vec = tuple([ x-y for x,y in zip(pt_2, centerlinePoint)])
+                    
+                    dot_direction = vtk.vtkMath.Dot(centerlinetangent, new_vec)
+                    
+                    if(term_bif ==True and dot_direction < 0.0):
+                        centerlinetangent = tuple( -p for p in centerlinetangent)
+    
+                    if(term_bif ==False and dot_direction > 0.0):
+                        centerlinetangent = tuple( -p for p in centerlinetangent)
+                
+                    ctr_points_id.InsertNextTuple([int(0)])
+                    ctr_pts_vector.InsertNextTuple(centerlinetangent) #inward pointing
+
+                elif (test == True):
+                    # use shortest path  to figure out the direction
+                    dijkstra.SetStartVertex(centerlinePointId) # start at clipping point 
+                    dijkstra.Update()
+                    writerd = vtk.vtkXMLPolyDataWriter()
+                    writerd.SetFileName("shortest_path_test{0}.vtp".format(seed_count))
+                    writerd.SetInputPort(dijkstra.GetOutputPort())
+                    writerd.Update()
+                    seed_count += 1
+                    
+                    
+                    # get the next point after the  centerlinePoint
+                    pt_1 = self.Centerlines.GetPoint(dijkstra.GetOutput().GetPoint(0) )
+                    pt_2 = self.Centerlines.GetPoint(dijkstra.GetOutput().GetPoint(1) )
+                    print(pt_1, pt_2)
+                    
+                    new_vec = tuple([ x-y for x,y in zip(pt_2, centerlinePoint)])
+                    
+                    dot_direction = vtk.vtkMath.Dot(centerlinetangent, new_vec)
+                    print(dot_direction)
+                    
+                    #if(dot_direction < 0.0):
+                        #centerlinetangent = tuple( -p for p in centerlinetangent)
+
+                
+                    #ctr_points_id.InsertNextTuple([int(0)])
+                    #ctr_pts_vector.InsertNextTuple(centerlinetangent) #inward pointing
+                    continue
+
+                else:
+                        if( seed_type == "outlets"):
+                            # outward facing normal
+                            centerlinetangent = tuple( -p for p in centerlinetangent)
+                            ctr_points_id.InsertNextTuple([int(1)])
+                        else:
+                            ctr_points_id.InsertNextTuple([int(0)])
+                            ctr_pts_vector.InsertNextTuple(centerlinetangent) #inward pointing
+                            
                 ctr_points.InsertNextPoint(centerlinePoint)
                 vertex = vtk.vtkVertex()
                 vertex.GetPointIds().InsertId(0, seed_count)
                 #vertex.GetPoints().SetPoint(seed_count, centerlinePoint)
                 vertices.InsertNextCell(vertex)
 
+                #if self.Interactive:
 
-                if( seed_type == "outlets"):
-                    # outward facing normal
-                    centerlinetangent = tuple( -p for p in centerlinetangent)
-                    ctr_points_id.InsertNextTuple([int(1)])
-                else:
-                    ctr_points_id.InsertNextTuple([int(0)])
-                ctr_pts_vector.InsertNextTuple(centerlinetangent) #inward pointing
+
+
                 #planeEstimator = vtkvmtk.vtkvmtkPolyDataNormalPlaneEstimator()
                 #planeEstimator.SetInputData(clippedSurface)
                 #planeEstimator.SetOriginPointId(seedPointId)
